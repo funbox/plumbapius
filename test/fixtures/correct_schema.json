@@ -1,0 +1,73 @@
+[
+    {
+      "path": "/sessions",
+      "method": "POST",
+      "content-type": "application/json",
+      "request": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "type": "object",
+        "properties": {
+          "login": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          },
+          "captcha": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "login",
+          "password"
+        ]
+      },
+      "responses": [
+        {
+          "status": "401",
+          "content-type": "application/json",
+          "body": {}
+        },
+        {
+          "status": "429",
+          "content-type": "application/json",
+          "body": {}
+        },
+        {
+          "status": "201",
+          "content-type": "application/json",
+          "body": {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "type": "object",
+            "properties": {
+              "confirmation": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "string"
+                  },
+                  "operation": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "id",
+                  "type",
+                  "operation"
+                ]
+              },
+              "captcha": {
+                "type": "string"
+              },
+              "captcha_does_not_match": {
+                "type": "boolean"
+              }
+            }
+          }
+        }
+      ]
+    }
+  ]
