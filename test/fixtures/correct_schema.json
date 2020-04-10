@@ -12,9 +12,6 @@
           },
           "password": {
             "type": "string"
-          },
-          "captcha": {
-            "type": "string"
           }
         },
         "required": [
@@ -25,11 +22,6 @@
       "responses": [
         {
           "status": "401",
-          "content-type": "application/json",
-          "body": {}
-        },
-        {
-          "status": "429",
           "content-type": "application/json",
           "body": {}
         },
@@ -45,25 +37,11 @@
                 "properties": {
                   "id": {
                     "type": "string"
-                  },
-                  "type": {
-                    "type": "string"
-                  },
-                  "operation": {
-                    "type": "string"
                   }
                 },
                 "required": [
-                  "id",
-                  "type",
-                  "operation"
+                  "id"
                 ]
-              },
-              "captcha": {
-                "type": "string"
-              },
-              "captcha_does_not_match": {
-                "type": "boolean"
               }
             }
           }

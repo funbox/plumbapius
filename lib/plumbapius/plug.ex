@@ -19,7 +19,11 @@ defmodule Plumbapius.Plug do
     |> handle_validation_result(handle_request_error, conn)
 
     Plug.Conn.register_before_send(conn, fn conn ->
-      Response.validate_response(current_request_schema, conn.status, conn.resp_body)
+      Response.validate_response(
+        current_request_schema,
+        conn.status,
+        Poison.decode!(conn.resp_body)
+      )
       |> handle_validation_result(handle_response_error, conn)
 
       conn
@@ -29,7 +33,8 @@ defmodule Plumbapius.Plug do
   defp find_request(request_schemas, request_method, request_path) do
     case Enum.find(request_schemas, &Request.match?(&1, request_method, request_path)) do
       nil ->
-        raise %Request.NotFoundError{}
+        raise %Request.NotFoundError{method: request_method, path: request_path}
+
       request_schema ->
         request_schema
     end
