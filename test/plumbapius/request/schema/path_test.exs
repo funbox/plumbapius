@@ -48,5 +48,15 @@ defmodule Plumbapius.Request.Schema.PathTest do
       assert String.match?(request_path, path)
       refute String.match?(incorrect_path, path)
     end
+
+    test "matches when the path has a resource only" do
+      path_with_many_id = "/{id}"
+      path = Path.to_regex(path_with_many_id)
+      request_path = "/acSCSDRfeW"
+      incorrect_path = "/acSCSDRfeW/"
+
+      assert String.match?(request_path, path)
+      refute String.match?(incorrect_path, path)
+    end
   end
 end
