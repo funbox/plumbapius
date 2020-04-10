@@ -50,7 +50,6 @@ defmodule Plumbapius.Response do
   @spec validate_response(Request.Schema.t(), non_neg_integer, map) :: :ok | {:error, String.t()}
   def validate_response(request_schema, response_status, response_body) do
     response_status
-    |> Integer.to_string()
     |> find_tomogram(request_schema.responses)
     |> validate(response_body)
   end

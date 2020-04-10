@@ -21,7 +21,7 @@ defmodule Plumbapius.Request.SchemaTest do
                },
                responses: [
                  %Plumbapius.Response.Schema{
-                   status: "200",
+                   status: 200,
                    content_type: "application/json",
                    body: %ExJsonSchema.Schema.Root{
                      custom_format_validator: nil,

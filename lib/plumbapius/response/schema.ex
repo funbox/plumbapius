@@ -6,7 +6,7 @@ defmodule Plumbapius.Response.Schema do
 
   @typedoc "Response Schema"
   @type t :: %__MODULE__{
-          status: String.t(),
+          status: non_neg_integer,
           content_type: String.t(),
           body: ExJsonSchema.Schema.Root.t()
         }
@@ -31,7 +31,7 @@ defmodule Plumbapius.Response.Schema do
       ...>   }
       ...> })
       %Plumbapius.Response.Schema{
-        status: "200",
+        status: 200,
         content_type: "application/json",
         body: %ExJsonSchema.Schema.Root{
           custom_format_validator: nil,
@@ -50,7 +50,7 @@ defmodule Plumbapius.Response.Schema do
   @spec new(map()) :: t()
   def new(tomogram) when is_map(tomogram) do
     %__MODULE__{
-      status: Map.fetch!(tomogram, "status"),
+      status: Map.fetch!(tomogram, "status") |> String.to_integer(),
       content_type: Map.fetch!(tomogram, "content-type"),
       body: Map.fetch!(tomogram, "body") |> ExJsonSchema.Schema.resolve()
     }

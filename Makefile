@@ -7,3 +7,5 @@ test:
 	mix test
 	mix dialyzer
 	mix credo --strict
+	mix cover
+	mix cover.lint

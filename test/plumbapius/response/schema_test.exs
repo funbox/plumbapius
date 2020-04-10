@@ -7,7 +7,7 @@ defmodule Plumbapius.Response.SchemaTest do
   describe "Plumbapius.Response.Schema.new/1" do
     test "when the tomogram is a valid response schema" do
       assert Schema.new(tomogram_schema()) == %Schema{
-               status: "200",
+               status: 200,
                content_type: "application/json",
                body: %ExJsonSchema.Schema.Root{
                  custom_format_validator: nil,

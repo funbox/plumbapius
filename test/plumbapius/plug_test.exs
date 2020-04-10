@@ -1,7 +1,7 @@
 defmodule Plumbapius.PlugTest do
   use ExUnit.Case
 
-  alias Plumbapius.Plug.IncorrectSchemaError
+  alias Plumbapius.Plug.Options.IncorrectSchemaError
 
   test "parse file which does not exist raise IncorrectSchemaError" do
     init_options = [apib_json_filepath: "incorrect/path/file.json"]
@@ -23,7 +23,7 @@ defmodule Plumbapius.PlugTest do
     init_options = [apib_json_filepath: "test/fixtures/correct_schema.json"]
 
     assert Plumbapius.Plug.init(init_options) ==
-             [
+             %Plumbapius.Plug.Options{
                schema: [
                  %Plumbapius.Request.Schema{
                    body: %ExJsonSchema.Schema.Root{
@@ -53,7 +53,7 @@ defmodule Plumbapius.PlugTest do
                          schema: %{}
                        },
                        content_type: "application/json",
-                       status: "401"
+                       status: 401
                      },
                      %Plumbapius.Response.Schema{
                        body: %ExJsonSchema.Schema.Root{
@@ -63,7 +63,7 @@ defmodule Plumbapius.PlugTest do
                          schema: %{}
                        },
                        content_type: "application/json",
-                       status: "429"
+                       status: 429
                      },
                      %Plumbapius.Response.Schema{
                        body: %ExJsonSchema.Schema.Root{
@@ -89,11 +89,11 @@ defmodule Plumbapius.PlugTest do
                          }
                        },
                        content_type: "application/json",
-                       status: "201"
+                       status: 201
                      }
                    ]
                  }
                ]
-             ]
+             }
   end
 end
