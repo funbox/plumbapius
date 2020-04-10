@@ -23,10 +23,10 @@ defmodule Plumbapius.Request.Schema.PathTest do
       path_with_many_id = "/users/{id}/zones/{zone_id}"
       path = Path.to_regex(path_with_many_id)
       request_path = "/users/acSCSDRfeW/zones/vdsDDWQF"
-      incorrect_path = "/users/acSCSDRfeW/zones/vdsDDWQF"
+      incorrect_path = "/users/acSCSDRfeW/zones/vdsDDWQF/"
 
       assert String.match?(request_path, path)
-      assert String.match?(incorrect_path, path)
+      refute String.match?(incorrect_path, path)
     end
 
     test "matches when the path has a resource id" do
