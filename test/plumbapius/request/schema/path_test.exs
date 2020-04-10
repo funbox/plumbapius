@@ -58,5 +58,16 @@ defmodule Plumbapius.Request.Schema.PathTest do
       assert String.match?(request_path, path)
       refute String.match?(incorrect_path, path)
     end
+
+    test "escape url symbols" do
+      path_with_many_id = "/{id}.+"
+      path = Path.to_regex(path_with_many_id)
+
+      request_path = "/acSCSDRfeW.+"
+      incorrect_path = "/acSCSDRfeW/foo/bar"
+
+      assert String.match?(request_path, path)
+      refute String.match?(incorrect_path, path)
+    end
   end
 end

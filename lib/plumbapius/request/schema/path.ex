@@ -22,7 +22,13 @@ defmodule Plumbapius.Request.Schema.Path do
     resource_id_schema = ~r/\{\w+\}/
     resource_id_regex = "[^&=/]+"
 
-    path_with_regex = String.replace(request_path_schema, resource_id_schema, resource_id_regex)
+    path_with_regex =
+      request_path_schema
+      |> Regex.escape()
+      |> String.replace("\\\{", "{")
+      |> String.replace("\\\}", "}")
+      |> String.replace(resource_id_schema, resource_id_regex)
+
     ~r/\A#{path_with_regex}\z/
   end
 end
