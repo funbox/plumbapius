@@ -1,0 +1,51 @@
+[
+    {
+      "path": "/sessions",
+      "method": "POST",
+      "content-type": "application/json",
+      "request": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "type": "object",
+        "properties": {
+          "login": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "login",
+          "password"
+        ]
+      },
+      "responses": [
+        {
+          "status": "401",
+          "content-type": "application/json",
+          "body": {}
+        },
+        {
+          "status": "201",
+          "content-type": "application/json",
+          "body": {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "type": "object",
+            "properties": {
+              "confirmation": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "id"
+                ]
+              }
+            }
+          }
+        }
+      ]
+    }
+  ]
