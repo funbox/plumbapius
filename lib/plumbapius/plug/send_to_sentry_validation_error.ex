@@ -1,6 +1,8 @@
 defmodule Plumbapius.Plug.SendToSentryValidationError do
   @behaviour Plug
 
+  @sentry Application.get_env(:sentry, :module, Sentry)
+
   defdelegate init(options), to: Plumbapius.Plug
 
   @impl Plug
@@ -9,10 +11,10 @@ defmodule Plumbapius.Plug.SendToSentryValidationError do
   end
 
   defp handle_request_error(error_message) do
-    Sentry.capture_message("Plumbapius.RequestError: #{inspect(error_message)}")
+    @sentry.capture_message("Plumbapius.RequestError: #{inspect(error_message)}")
   end
 
   defp handle_response_error(error_message) do
-    Sentry.capture_message("Plumbapius.ResponseError: #{inspect(error_message)}")
+    @sentry.capture_message("Plumbapius.ResponseError: #{inspect(error_message)}")
   end
 end

@@ -43,7 +43,8 @@ defmodule Plumbapius.MixProject do
       {:excoveralls, "~> 0.11", only: :test},
       {:excoveralls_linter, "~> 0.0.2", only: :test},
       {:plug_cowboy, "~> 2.0"},
-      {:sentry, "~> 7.0"}
+      {:sentry, "~> 7.0"},
+      {:bypass, "~> 1.0", only: :test}
     ]
   end
 
