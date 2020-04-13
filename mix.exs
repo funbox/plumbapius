@@ -18,9 +18,13 @@ defmodule Plumbapius.MixProject do
         dialyzer: :test,
         arch_test: :test
       ],
+      elixirc_paths: elixirc_paths(Mix.env()),
       test_coverage: [tool: ExCoveralls]
     ]
   end
+
+  defp elixirc_paths(env) when env in [:test], do: ["lib", "test/support"]
+  defp elixirc_paths(_), do: ["lib"]
 
   # Run "mix help compile.app" to learn about applications.
   def application do
@@ -38,7 +42,8 @@ defmodule Plumbapius.MixProject do
       {:credo, "~> 1.2", only: [:dev, :test], runtime: false},
       {:excoveralls, "~> 0.11", only: :test},
       {:excoveralls_linter, "~> 0.0.2", only: :test},
-      {:plug_cowboy, "~> 2.0"}
+      {:plug_cowboy, "~> 2.0"},
+      {:sentry, "~> 7.0"}
     ]
   end
 

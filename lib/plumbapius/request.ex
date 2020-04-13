@@ -7,7 +7,9 @@ defmodule Plumbapius.Request do
 
     @impl true
     def message(exception) do
-      "request #{inspect(exception.method)}: #{inspect(exception.path)} with content-type: #{inspect(exception.content_type)} not found"
+      "request #{inspect(exception.method)}: #{inspect(exception.path)} with content-type: #{
+        inspect(exception.content_type)
+      } not found"
     end
   end
 
@@ -80,6 +82,12 @@ defmodule Plumbapius.Request do
       String.match?(request_path, request_schema.path)
   end
 
+  @spec error_message(Plug.Conn.t(), any) :: %{
+          method: String.t(),
+          path: String.t(),
+          body: String.t(),
+          error: any
+        }
   def error_message(conn, error) do
     %{
       method: conn.method,

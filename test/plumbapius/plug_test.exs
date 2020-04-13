@@ -2,129 +2,66 @@ defmodule Plumbapius.PlugTest do
   use ExUnit.Case
   use Plug.Test
 
-  defmodule Helper do
-    defmodule RequestHandlerRaiseError do
-      defexception message: "mock raise validation request error"
-    end
-
-    defmodule ResponseHandlerRaiseError do
-      defexception message: "mock raise validation response error"
-    end
-
-    @options %Plumbapius.Plug.Options{
-      schema: [
-        %Plumbapius.Request.Schema{
-          body: %ExJsonSchema.Schema.Root{
-            custom_format_validator: nil,
-            location: :root,
-            refs: %{},
-            schema: %{
-              "$schema" => "http://json-schema.org/draft-04/schema#",
-              "properties" => %{
-                "login" => %{"type" => "string"},
-                "password" => %{"type" => "string"}
-              },
-              "required" => ["login", "password"],
-              "type" => "object"
-            }
-          },
-          content_type: "application/json",
-          method: "POST",
-          path: ~r/\A\/sessions\z/,
-          responses: [
-            %Plumbapius.Response.Schema{
-              body: %ExJsonSchema.Schema.Root{
-                custom_format_validator: nil,
-                location: :root,
-                refs: %{},
-                schema: %{}
-              },
-              content_type: "application/json",
-              status: 401
-            },
-            %Plumbapius.Response.Schema{
-              body: %ExJsonSchema.Schema.Root{
-                custom_format_validator: nil,
-                location: :root,
-                refs: %{},
-                schema: %{
-                  "$schema" => "http://json-schema.org/draft-04/schema#",
-                  "properties" => %{
-                    "confirmation" => %{
-                      "properties" => %{"id" => %{"type" => "string"}},
-                      "required" => ["id"],
-                      "type" => "object"
-                    }
-                  },
-                  "type" => "object"
-                }
-              },
-              content_type: "application/json",
-              status: 201
-            }
-          ]
-        }
-      ]
-    }
-
-    def options, do: @options
-
-    @spec handle_request_error(map) :: none
-    def handle_request_error(_), do: raise(RequestHandlerRaiseError)
-
-    @spec handle_response_error(map) :: none
-    def handle_response_error(_), do: raise(ResponseHandlerRaiseError)
-  end
-
+  alias FakePlugRealization, as: Helper
   alias Plumbapius.Plug.Options.IncorrectSchemaError
   alias Plumbapius.Request.NotFoundError
 
   describe "test call method" do
     test "raise Request.NotFoundError when path is not specified for path due with method" do
-      conn = conn(:get, "/sessions", %{"login" => "admin", "password" => "admin"})
-             |> put_req_header("content-type", "application/json")
+      conn =
+        conn(:get, "/sessions", %{"login" => "admin", "password" => "admin"})
+        |> put_req_header("content-type", "application/json")
 
-      assert_raise NotFoundError, "request \"GET\": \"/sessions\" with content-type: \"application/json\" not found", fn ->
-        Plumbapius.Plug.call(
-          conn,
-          Helper.options(),
-          &Helper.handle_request_error/1,
-          &Helper.handle_response_error/1
-        )
-      end
+      assert_raise NotFoundError,
+                   "request \"GET\": \"/sessions\" with content-type: \"application/json\" not found",
+                   fn ->
+                     Plumbapius.Plug.call(
+                       conn,
+                       Helper.options(),
+                       &Helper.handle_request_error/1,
+                       &Helper.handle_response_error/1
+                     )
+                   end
     end
 
     test "raise Request.NotFoundError when path is not specified for path due with content-type" do
-      conn = conn(:post, "/sessions", %{"login" => "admin", "password" => "admin"})
-             |> put_req_header("content-type", "plain/text")
+      conn =
+        conn(:post, "/sessions", %{"login" => "admin", "password" => "admin"})
+        |> put_req_header("content-type", "plain/text")
 
-      assert_raise NotFoundError, "request \"POST\": \"/sessions\" with content-type: \"plain/text\" not found", fn ->
-        Plumbapius.Plug.call(
-          conn,
-          Helper.options(),
-          &Helper.handle_request_error/1,
-          &Helper.handle_response_error/1
-        )
-      end
+      assert_raise NotFoundError,
+                   "request \"POST\": \"/sessions\" with content-type: \"plain/text\" not found",
+                   fn ->
+                     Plumbapius.Plug.call(
+                       conn,
+                       Helper.options(),
+                       &Helper.handle_request_error/1,
+                       &Helper.handle_response_error/1
+                     )
+                   end
     end
 
     test "raise Request.NotFoundError when path is not specified for path due with path" do
-      conn = conn(:post, "/foo-bar", %{"login" => "admin", "password" => "admin"})
-             |> put_req_header("content-type", "application/json")
+      conn =
+        conn(:post, "/foo-bar", %{"login" => "admin", "password" => "admin"})
+        |> put_req_header("content-type", "application/json")
 
-      assert_raise NotFoundError, "request \"POST\": \"/foo-bar\" with content-type: \"application/json\" not found", fn ->
-        Plumbapius.Plug.call(
-          conn,
-          Helper.options(),
-          &Helper.handle_request_error/1,
-          &Helper.handle_response_error/1
-        )
-      end
+      assert_raise NotFoundError,
+                   "request \"POST\": \"/foo-bar\" with content-type: \"application/json\" not found",
+                   fn ->
+                     Plumbapius.Plug.call(
+                       conn,
+                       Helper.options(),
+                       &Helper.handle_request_error/1,
+                       &Helper.handle_response_error/1
+                     )
+                   end
     end
 
     test "raise Helper.RequestHandlerRaiseError when pass incorrect params" do
-      conn = conn(:post, "/sessions", %{"foo" => "bar", "password" => "admin"})
-             |> put_req_header("content-type", "application/json")
+      conn =
+        conn(:post, "/sessions", %{"foo" => "bar", "password" => "admin"})
+        |> put_req_header("content-type", "application/json")
 
       assert_raise Helper.RequestHandlerRaiseError, "mock raise validation request error", fn ->
         Plumbapius.Plug.call(
@@ -158,8 +95,7 @@ defmodule Plumbapius.PlugTest do
       send_resp(conn)
     end
 
-    @spec correct_conn_with_response(non_neg_integer, binary) :: Plug.Conn.t()
-    def correct_conn_with_response(status, body) do
+    defp correct_conn_with_response(status, body) do
       conn(:post, "/sessions", %{"login" => "admin", "password" => "admin"})
       |> put_req_header("content-type", "application/json")
       |> Plumbapius.Plug.call(

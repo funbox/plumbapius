@@ -33,9 +33,16 @@ defmodule Plumbapius.Plug do
   end
 
   defp find_request(request_schemas, request_method, request_path, request_content_type) do
-    case Enum.find(request_schemas, &Request.match?(&1, request_method, request_path, request_content_type)) do
+    case Enum.find(
+           request_schemas,
+           &Request.match?(&1, request_method, request_path, request_content_type)
+         ) do
       nil ->
-        raise %Request.NotFoundError{method: request_method, path: request_path, content_type: request_content_type}
+        raise %Request.NotFoundError{
+          method: request_method,
+          path: request_path,
+          content_type: request_content_type
+        }
 
       request_schema ->
         request_schema
