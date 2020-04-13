@@ -1,20 +1,23 @@
 defmodule Plumbapius.Plug.SendToSentryValidationError do
   @behaviour Plug
 
-  @sentry Application.get_env(:sentry, :module, Sentry)
-
   defdelegate init(options), to: Plumbapius.Plug
 
   @impl Plug
-  def call(conn, opts, plug_module \\ Plumbapius.Plug) do
-    plug_module.call(conn, opts, &handle_request_error/1, &handle_response_error/1)
+  def call(conn, opts, plug_module \\ Plumbapius.Plug, sentry \\ Sentry) do
+    plug_module.call(
+      conn,
+      opts,
+      fn error_msg -> handle_request_error(error_msg, sentry) end,
+      fn error_msg -> handle_response_error(error_msg, sentry) end
+    )
   end
 
-  defp handle_request_error(error_message) do
-    @sentry.capture_message("Plumbapius.RequestError: #{inspect(error_message)}")
+  defp handle_request_error(error_message, sentry) do
+    sentry.capture_message("Plumbapius.RequestError: #{inspect(error_message)}")
   end
 
-  defp handle_response_error(error_message) do
-    @sentry.capture_message("Plumbapius.ResponseError: #{inspect(error_message)}")
+  defp handle_response_error(error_message, sentry) do
+    sentry.capture_message("Plumbapius.ResponseError: #{inspect(error_message)}")
   end
 end

@@ -4,14 +4,14 @@ defmodule Plumbapius.Plug.SendToSentryValidationErrorTest do
   alias Plumbapius.Plug.SendToSentryValidationError
 
   test "send RequestError into sentry when request invalid" do
-    SendToSentryValidationError.call(:request_error, nil, FakePlug)
+    SendToSentryValidationError.call(:request_error, nil, FakePlug, FakeSentry)
   end
 
   test "send ResponseError into sentry when response invalid" do
-    SendToSentryValidationError.call(:response_error, nil, FakePlug)
+    SendToSentryValidationError.call(:response_error, nil, FakePlug, FakeSentry)
   end
 
   test "send both errors into sentry when both invalid" do
-    SendToSentryValidationError.call(nil, nil, FakePlug)
+    SendToSentryValidationError.call(nil, nil, FakePlug, FakeSentry)
   end
 end
