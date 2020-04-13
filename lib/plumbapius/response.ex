@@ -54,6 +54,18 @@ defmodule Plumbapius.Response do
     |> validate(response_body)
   end
 
+  def error_message(conn, error) do
+    %{
+      request: %{
+        method: conn.method,
+        path: conn.request_path
+      },
+      status: conn.status,
+      body: conn.resp_body,
+      error: error
+    }
+  end
+
   defp find_tomogram(response_status, responses) do
     responses
     |> Enum.filter(&(&1.status == response_status))

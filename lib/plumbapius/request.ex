@@ -3,11 +3,11 @@ defmodule Plumbapius.Request do
 
   defmodule NotFoundError do
     @moduledoc "Describes a request search error in api schema"
-    defexception [:method, :path]
+    defexception [:method, :path, :content_type]
 
     @impl true
     def message(exception) do
-      "request #{inspect(exception.method)}: #{inspect(exception.path)} not found"
+      "request #{inspect(exception.method)}: #{inspect(exception.path)} with content-type: #{inspect(exception.content_type)} not found"
     end
   end
 
@@ -64,16 +64,28 @@ defmodule Plumbapius.Request do
       ...>   "request"=>%{},
       ...>   "responses"=>[]
       ...> })
-      iex> Plumbapius.Request.match?(request_schema, "GET", "/users/1")
+      iex> Plumbapius.Request.match?(request_schema, "GET", "/users/1", "application/json")
       true
-      iex> Plumbapius.Request.match?(request_schema, "GET", "/users")
+      iex> Plumbapius.Request.match?(request_schema, "GET", "/users", "application/json")
       false
-      iex> Plumbapius.Request.match?(request_schema, "POST", "/users/1")
+      iex> Plumbapius.Request.match?(request_schema, "POST", "/users/1", "application/json")
+      false
+      iex> Plumbapius.Request.match?(request_schema, "GET", "/users/1", "plain/text")
       false
   """
-  @spec match?(Request.Schema.t(), String.t(), String.t()) :: boolean()
-  def match?(request_schema, request_method, request_path) do
+  @spec match?(Request.Schema.t(), String.t(), String.t(), String.t()) :: boolean()
+  def match?(request_schema, request_method, request_path, request_content_type) do
     String.equivalent?(request_method, request_schema.method) &&
+      String.equivalent?(request_content_type, request_schema.content_type) &&
       String.match?(request_path, request_schema.path)
+  end
+
+  def error_message(conn, error) do
+    %{
+      method: conn.method,
+      path: conn.request_path,
+      body: conn.body_params,
+      error: error
+    }
   end
 end

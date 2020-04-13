@@ -22,22 +22,25 @@ defmodule Plumbapius.RequestTest do
     test "when the schema matches for the request" do
       request_method = "GET"
       request_path = "/users/1"
+      content_type = "application/json"
 
-      assert Request.match?(request_schema(), request_method, request_path) == true
+      assert Request.match?(request_schema(), request_method, request_path, content_type) == true
     end
 
     test "when the request has a different method" do
       request_method = "GET"
       request_path = "/users"
+      content_type = "application/json"
 
-      assert Request.match?(request_schema(), request_method, request_path) == false
+      assert Request.match?(request_schema(), request_method, request_path, content_type) == false
     end
 
     test "when the request has a different path" do
       request_method = "POST"
       request_path = "/users/1"
+      content_type = "application/json"
 
-      assert Request.match?(request_schema(), request_method, request_path) == false
+      assert Request.match?(request_schema(), request_method, request_path, content_type) == false
     end
   end
 

@@ -69,11 +69,11 @@ defmodule Plumbapius.PlugTest do
 
     def options, do: @options
 
-    @spec handle_request_error(Plug.Conn.t(), any) :: none
-    def handle_request_error(_, _), do: raise(RequestHandlerRaiseError)
+    @spec handle_request_error(map) :: none
+    def handle_request_error(_), do: raise(RequestHandlerRaiseError)
 
-    @spec handle_response_error(Plug.Conn.t(), any) :: none
-    def handle_response_error(_, _), do: raise(ResponseHandlerRaiseError)
+    @spec handle_response_error(map) :: none
+    def handle_response_error(_), do: raise(ResponseHandlerRaiseError)
   end
 
   alias Plumbapius.Plug.Options.IncorrectSchemaError
@@ -82,39 +82,56 @@ defmodule Plumbapius.PlugTest do
   describe "test call method" do
     test "raise Request.NotFoundError when path is not specified for path due with method" do
       conn = conn(:get, "/sessions", %{"login" => "admin", "password" => "admin"})
+             |> put_req_header("content-type", "application/json")
 
-      assert_raise NotFoundError, "request \"GET\": \"/sessions\" not found", fn ->
+      assert_raise NotFoundError, "request \"GET\": \"/sessions\" with content-type: \"application/json\" not found", fn ->
         Plumbapius.Plug.call(
           conn,
           Helper.options(),
-          &Helper.handle_request_error/2,
-          &Helper.handle_response_error/2
+          &Helper.handle_request_error/1,
+          &Helper.handle_response_error/1
+        )
+      end
+    end
+
+    test "raise Request.NotFoundError when path is not specified for path due with content-type" do
+      conn = conn(:post, "/sessions", %{"login" => "admin", "password" => "admin"})
+             |> put_req_header("content-type", "plain/text")
+
+      assert_raise NotFoundError, "request \"POST\": \"/sessions\" with content-type: \"plain/text\" not found", fn ->
+        Plumbapius.Plug.call(
+          conn,
+          Helper.options(),
+          &Helper.handle_request_error/1,
+          &Helper.handle_response_error/1
         )
       end
     end
 
     test "raise Request.NotFoundError when path is not specified for path due with path" do
       conn = conn(:post, "/foo-bar", %{"login" => "admin", "password" => "admin"})
+             |> put_req_header("content-type", "application/json")
 
-      assert_raise NotFoundError, "request \"POST\": \"/foo-bar\" not found", fn ->
+      assert_raise NotFoundError, "request \"POST\": \"/foo-bar\" with content-type: \"application/json\" not found", fn ->
         Plumbapius.Plug.call(
           conn,
           Helper.options(),
-          &Helper.handle_request_error/2,
-          &Helper.handle_response_error/2
+          &Helper.handle_request_error/1,
+          &Helper.handle_response_error/1
         )
       end
     end
 
     test "raise Helper.RequestHandlerRaiseError when pass incorrect params" do
       conn = conn(:post, "/sessions", %{"foo" => "bar", "password" => "admin"})
+             |> put_req_header("content-type", "application/json")
 
       assert_raise Helper.RequestHandlerRaiseError, "mock raise validation request error", fn ->
         Plumbapius.Plug.call(
           conn,
           Helper.options(),
-          &Helper.handle_request_error/2,
-          &Helper.handle_response_error/2
+          &Helper.handle_request_error/1,
+          &Helper.handle_response_error/1
         )
       end
     end
@@ -137,16 +154,18 @@ defmodule Plumbapius.PlugTest do
 
     test "returns without exceptions" do
       conn = correct_conn_with_response(201, "{\"confirmation\": {\"id\": \"afqWDXAcaWacW\"}}")
+
       send_resp(conn)
     end
 
     @spec correct_conn_with_response(non_neg_integer, binary) :: Plug.Conn.t()
     def correct_conn_with_response(status, body) do
       conn(:post, "/sessions", %{"login" => "admin", "password" => "admin"})
+      |> put_req_header("content-type", "application/json")
       |> Plumbapius.Plug.call(
         Helper.options(),
-        &Helper.handle_request_error/2,
-        &Helper.handle_response_error/2
+        &Helper.handle_request_error/1,
+        &Helper.handle_response_error/1
       )
       |> resp(status, body)
     end
