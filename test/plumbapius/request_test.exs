@@ -24,7 +24,7 @@ defmodule Plumbapius.RequestTest do
       request_path = "/users/1"
       content_type = "application/json"
 
-      assert Request.match?(request_schema(), request_method, request_path, content_type) == true
+      assert Request.match?(request_schema(), request_method, request_path, content_type)
     end
 
     test "when the request has a different method" do
@@ -32,7 +32,7 @@ defmodule Plumbapius.RequestTest do
       request_path = "/users"
       content_type = "application/json"
 
-      assert Request.match?(request_schema(), request_method, request_path, content_type) == false
+      refute Request.match?(request_schema(), request_method, request_path, content_type)
     end
 
     test "when the request has a different path" do
@@ -40,7 +40,7 @@ defmodule Plumbapius.RequestTest do
       request_path = "/users/1"
       content_type = "application/json"
 
-      assert Request.match?(request_schema(), request_method, request_path, content_type) == false
+      refute Request.match?(request_schema(), request_method, request_path, content_type)
     end
   end
 
