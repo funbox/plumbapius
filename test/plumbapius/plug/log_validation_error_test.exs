@@ -3,6 +3,13 @@ defmodule Plumbapius.Plug.LogValidationErrorTest do
   import ExUnit.CaptureLog
 
   alias Plumbapius.Plug.LogValidationError
+  alias FakePlugImplementation, as: Helper
+
+  test "init delegates to base Plug and returns options" do
+    init_options = [apib_json_filepath: "test/fixtures/correct_schema.json"]
+
+    assert LogValidationError.init(init_options) == Helper.options()
+  end
 
   test "log request error" do
     assert capture_log(fn ->

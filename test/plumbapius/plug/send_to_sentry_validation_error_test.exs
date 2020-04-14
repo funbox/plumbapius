@@ -2,6 +2,13 @@ defmodule Plumbapius.Plug.SendToSentryValidationErrorTest do
   use ExUnit.Case, async: true
 
   alias Plumbapius.Plug.SendToSentryValidationError
+  alias FakePlugImplementation, as: Helper
+
+  test "init delegates to base Plug and returns options" do
+    init_options = [apib_json_filepath: "test/fixtures/correct_schema.json"]
+
+    assert SendToSentryValidationError.init(init_options) == Helper.options()
+  end
 
   test "send RequestError into sentry when request invalid" do
     SendToSentryValidationError.call(:request_error, nil, FakePlug, FakeSentry)
