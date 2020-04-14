@@ -8,26 +8,30 @@ defmodule Plumbapius.Plug.LogValidationErrorTest do
     assert capture_log(fn ->
              LogValidationError.call(:request_error, nil, FakePlug)
            end) =~
-             "[debug] Plumbapius.RequestError: %Plumbapius.Request.ErrorDescription{body: %{\"foo\" => \"bar\"}, error: [{\"Type mismatch. Expected Number but got String.\", \"#/msisdn\"}], method: \"get\", path: \"/fake/path\"}"
+             ~s([warn]  Plumbapius.RequestError: %Plumbapius.Request.ErrorDescription{body: %{"foo" => "bar"}, error: [{"Type mismatch. Expected Number but got String.", "#/msisdn"}], method: "get", path: "/fake/path"})
   end
 
   test "log response error" do
     assert capture_log(fn ->
              LogValidationError.call(:response_error, nil, FakePlug)
            end) =~
-             "[debug] Plumbapius.ResponseError: %Plumbapius.Response.ErrorDescription{body: [\"{\", \"foo\", \":\", \"bar\", \"}\"], error: \"invalid\", request: %{method: \"get\", path: \"/fake/path\"}, status: 200}"
+             ~s([warn]  Plumbapius.ResponseError: %Plumbapius.Response.ErrorDescription{body: ["{", "foo", ":", "bar", "}"], error: "invalid", request: %{method: "get", path: "/fake/path"}, status: 200})
   end
 
   test "log request and response error" do
     logs =
       capture_log(fn ->
-        LogValidationError.call(nil, nil, FakePlug)
+        LogValidationError.call(:both, nil, FakePlug)
       end)
 
-    logs =~
-      "[debug] Plumbapius.RequestError: %{body: %{\"foo\" => \"bar\"}, error: [{\"Type mismatch. Expected Number but got String.\", \"#/msisdn\"}], method: \"get\", path: \"/fake/path\"}"
+    assert logs =~
+             ~s([warn]  Plumbapius.RequestError: %Plumbapius.Request.ErrorDescription{body: %{"foo" => "bar"}, error: [{"Type mismatch. Expected Number but got String.", "#/msisdn"}], method: "get", path: "/fake/path"})
 
-    logs =~
-      "[debug] Plumbapius.ResponseError: %{body: %{\"bar\" => \"foo\"}, error: \"invalid\", request: %{method: \"get\", path: \"/fake/path\"}, status: 200}"
+    assert logs =~
+             ~s([warn]  Plumbapius.ResponseError: %Plumbapius.Response.ErrorDescription{body: ["{", "foo", ":", "bar", "}"], error: "invalid", request: %{method: "get", path: "/fake/path"}, status: 200})
+  end
+
+  test "plug return call result" do
+    assert LogValidationError.call(nil, nil, FakePlug) == {:ok, :called}
   end
 end

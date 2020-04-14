@@ -2,7 +2,10 @@ defmodule FakePlug do
   alias Plumbapius.Request
   alias Plumbapius.Response
 
-  @spec call(atom | nil, any, function, function) :: any
+  @spec call(:request_error | :response_error | :both | nil, any, function, function) :: any
+
+  def call(nil, _opts, _handle_request_error, _handle_resposne_error), do: {:ok, :called}
+
   def call(:request_error, _opts, handle_request_error, _handle_response_error) do
     handle_request_error.(request_error())
   end
@@ -11,7 +14,7 @@ defmodule FakePlug do
     handle_response_error.(response_error())
   end
 
-  def call(_conn, _opts, handle_request_error, handle_response_error) do
+  def call(:both, _opts, handle_request_error, handle_response_error) do
     handle_request_error.(request_error())
     handle_response_error.(response_error())
   end

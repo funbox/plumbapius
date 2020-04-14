@@ -2,7 +2,7 @@ defmodule Plumbapius.PlugTest do
   use ExUnit.Case
   use Plug.Test
 
-  alias FakePlugRealization, as: Helper
+  alias FakePlugImplementation, as: Helper
   alias Plumbapius.Plug.Options.IncorrectSchemaError
   alias Plumbapius.Request.NotFoundError
 

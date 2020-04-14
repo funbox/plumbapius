@@ -1,4 +1,4 @@
-defmodule FakePlugRealization do
+defmodule FakePlugImplementation do
   defmodule RequestHandlerRaiseError do
     defexception message: "mock raise validation request error"
   end

@@ -1,6 +1,10 @@
 defmodule FakeSentry do
-  @spec capture_message(any) :: :ok
-  def capture_message("Plumbapius.RequestError" <> _other = _msg), do: :ok
+  require Logger
 
-  def capture_message("Plumbapius.ResponseError" <> _other = _msg), do: :ok
+  @spec capture_message(any) :: :ok
+  def capture_message("Plumbapius.RequestError" <> _other = _msg),
+    do: Logger.debug("capture_message called for RequestError")
+
+  def capture_message("Plumbapius.ResponseError" <> _other = _msg),
+    do: Logger.debug("capture_message called for ResponseError")
 end

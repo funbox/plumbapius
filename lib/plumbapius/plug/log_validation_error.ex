@@ -14,10 +14,10 @@ defmodule Plumbapius.Plug.LogValidationError do
   end
 
   defp handle_request_error(%Request.ErrorDescription{} = error_message) do
-    Logger.debug("Plumbapius.RequestError: #{inspect(error_message)}")
+    Logger.warn("Plumbapius.RequestError: #{inspect(error_message)}")
   end
 
   defp handle_response_error(%Response.ErrorDescription{} = error_message) do
-    Logger.debug("Plumbapius.ResponseError: #{inspect(error_message)}")
+    Logger.warn("Plumbapius.ResponseError: #{inspect(error_message)}")
   end
 end
