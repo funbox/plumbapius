@@ -1,27 +1,25 @@
 defmodule Plumbapius.Plug.SendToSentryValidationErrorTest do
   use ExUnit.Case, async: true
-  import ExUnit.CaptureLog
 
   alias Plumbapius.Plug.SendToSentryValidationError
 
   test "send RequestError into sentry when request invalid" do
-    assert capture_log(fn ->
-             SendToSentryValidationError.call(:request_error, nil, FakePlug, FakeSentry)
-           end) =~ "capture_message called for RequestError"
+    SendToSentryValidationError.call(:request_error, nil, FakePlug, FakeSentry)
+
+    assert_received :sentry_called_request_error
   end
 
   test "send ResponseError into sentry when response invalid" do
-    assert capture_log(fn ->
-             SendToSentryValidationError.call(:response_error, nil, FakePlug, FakeSentry)
-           end) =~ "capture_message called for ResponseError"
+    SendToSentryValidationError.call(:response_error, nil, FakePlug, FakeSentry)
+
+    assert_received :sentry_called_response_error
   end
 
   test "send both errors into sentry when both invalid" do
-    logs =
-      capture_log(fn -> SendToSentryValidationError.call(:both, nil, FakePlug, FakeSentry) end)
+    SendToSentryValidationError.call(:both, nil, FakePlug, FakeSentry)
 
-    assert logs =~ "capture_message called for RequestError"
-    assert logs =~ "capture_message called for ResponseError"
+    assert_received :sentry_called_request_error
+    assert_received :sentry_called_response_error
   end
 
   test "plug return call result" do
