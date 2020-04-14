@@ -1,4 +1,7 @@
 defmodule FakePlug do
+  alias Plumbapius.Request
+  alias Plumbapius.Response
+
   @spec call(atom | nil, any, function, function) :: any
   def call(:request_error, _opts, handle_request_error, _handle_response_error) do
     handle_request_error.(request_error())
@@ -14,7 +17,7 @@ defmodule FakePlug do
   end
 
   defp request_error,
-    do: %{
+    do: %Request.ErrorDescription{
       method: "get",
       path: "/fake/path",
       body: %{"foo" => "bar"},
@@ -22,13 +25,13 @@ defmodule FakePlug do
     }
 
   defp response_error,
-    do: %{
+    do: %Response.ErrorDescription{
       request: %{
         method: "get",
         path: "/fake/path"
       },
       status: 200,
-      body: %{"bar" => "foo"},
+      body: ["{", "foo", ":", "bar", "}"],
       error: "invalid"
     }
 end

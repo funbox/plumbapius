@@ -81,19 +81,4 @@ defmodule Plumbapius.Request do
       String.equivalent?(request_content_type, request_schema.content_type) &&
       String.match?(request_path, request_schema.path)
   end
-
-  @spec error_message(Plug.Conn.t(), any) :: %{
-          method: String.t(),
-          path: String.t(),
-          body: String.t(),
-          error: any
-        }
-  def error_message(conn, error) do
-    %{
-      method: conn.method,
-      path: conn.request_path,
-      body: conn.body_params,
-      error: error
-    }
-  end
 end
