@@ -67,6 +67,16 @@ defmodule FakePlugImplementation do
             },
             content_type: "application/json",
             status: 201
+          },
+          %Plumbapius.Response.Schema{
+            body: %ExJsonSchema.Schema.Root{
+              custom_format_validator: nil,
+              location: :root,
+              refs: %{},
+              schema: %{}
+            },
+            content_type: "application/json",
+            status: 200
           }
         ]
       }

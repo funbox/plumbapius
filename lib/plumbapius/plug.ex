@@ -10,6 +10,16 @@ defmodule Plumbapius.Plug do
 
   @spec call(Plug.Conn.t(), Options.t(), function, function) ::
           Plug.Conn.t()
+  def call(
+        %{private: %{plumbapius_ignore: ignore}} = conn,
+        _options,
+        _handle_request_error,
+        _handle_response_error
+      )
+      when ignore do
+    conn
+  end
+
   def call(conn, options, handle_request_error, handle_response_error) do
     content_type = Plug.Conn.get_req_header(conn, "content-type") |> Enum.at(0)
 
@@ -21,7 +31,8 @@ defmodule Plumbapius.Plug do
     |> handle_validation_result(handle_request_error, conn, Request.ErrorDescription)
 
     register_before_send = fn conn ->
-      validate_response(current_request_schema, conn.resp_body, conn.status)
+      parse_resp_body(conn.resp_body)
+      |> validate_response(current_request_schema, conn.status)
       |> handle_validation_result(handle_response_error, conn, Response.ErrorDescription)
 
       conn
@@ -47,23 +58,19 @@ defmodule Plumbapius.Plug do
     end
   end
 
-  defp validate_response(request_schema, resp_body, status) do
-    case parse_resp_body(resp_body) do
-      {:ok, resp_body} ->
-        Response.validate_response(
-          request_schema,
-          status,
-          resp_body
-        )
-
-      error ->
-        error
-    end
-  end
-
   defp parse_resp_body(""), do: {:ok, %{}}
 
   defp parse_resp_body(body), do: Poison.decode(body)
+
+  defp validate_response({:ok, resp_body}, request_schema, status),
+    do:
+      Response.validate_response(
+        request_schema,
+        status,
+        resp_body
+      )
+
+  defp validate_response(error, _request_schema, _status), do: error
 
   defp handle_validation_result(:ok, _error_handler, _conn, _validation_module), do: :ok
 

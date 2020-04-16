@@ -45,6 +45,12 @@
               }
             }
           }
+        },
+        {
+          "status": "200",
+          "body": {
+          },
+          "content-type": "application/json"
         }
       ]
     }

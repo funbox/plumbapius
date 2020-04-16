@@ -7,6 +7,21 @@ defmodule Plumbapius.PlugTest do
   alias Plumbapius.Request.NotFoundError
 
   describe "test call method" do
+    test "returns conn even for incorrect request but with Plumbapius.ignore command" do
+      conn =
+        conn(:get, "/sessions", %{"login" => "admin", "password" => "admin"})
+        |> put_req_header("content-type", "application/json")
+        |> Plumbapius.ignore()
+
+      assert conn ==
+               Plumbapius.Plug.call(
+                 conn,
+                 Helper.options(),
+                 &Helper.handle_request_error/1,
+                 &Helper.handle_response_error/1
+               )
+    end
+
     test "raise Request.NotFoundError when path is not specified for path due with method" do
       conn =
         conn(:get, "/sessions", %{"login" => "admin", "password" => "admin"})
@@ -137,6 +152,12 @@ defmodule Plumbapius.PlugTest do
                    fn ->
                      send_resp(conn)
                    end
+    end
+
+    test "returns without exceptions for empty response body" do
+      conn = correct_conn_with_response(200, "")
+
+      send_resp(conn)
     end
 
     test "returns without exceptions" do
