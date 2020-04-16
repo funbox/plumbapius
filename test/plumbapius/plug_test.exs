@@ -129,9 +129,7 @@ defmodule Plumbapius.PlugTest do
 
       assert_raise Helper.ResponseHandlerRaiseError,
                    ~s(Plumpabius.ResponseError: %Plumbapius.Response.ErrorDescription{body: "{\\"confirmation\\": {\\"foo\\": \\"bar\\"}}", error: "invalid", request: %{method: "POST", path: "/sessions"}, status: 201}),
-                   fn ->
-                     send_resp(conn)
-                   end
+                   fn -> send_resp(conn) end
     end
 
     test "raise Helper.ResponseHandlerRaiseError when returns incorrect status" do
@@ -139,19 +137,13 @@ defmodule Plumbapius.PlugTest do
 
       assert_raise Helper.ResponseHandlerRaiseError,
                    ~s(Plumpabius.ResponseError: %Plumbapius.Response.ErrorDescription{body: "{\\"confirmation\\": {\\"id\\": \\"avaFqscDQWcAs\\"}}", error: "invalid", request: %{method: "POST", path: "/sessions"}, status: 123}),
-                   fn ->
-                     send_resp(conn)
-                   end
+                   fn -> send_resp(conn) end
     end
 
     test "raise Helper.ResponseHandlerRaiseError when returns incorrect body" do
       conn = correct_conn_with_response(123, "qwe")
 
-      assert_raise Helper.ResponseHandlerRaiseError,
-                   ~s(Plumpabius.ResponseError: %Plumbapius.Response.ErrorDescription{body: "qwe", error: {:invalid, "q", 0}, request: %{method: "POST", path: "/sessions"}, status: 123}),
-                   fn ->
-                     send_resp(conn)
-                   end
+      assert_raise Helper.ResponseHandlerRaiseError, fn -> send_resp(conn) end
     end
 
     test "returns without exceptions for empty response body" do
@@ -182,7 +174,7 @@ defmodule Plumbapius.PlugTest do
     test "parse file which does not exist raise IncorrectSchemaError" do
       init_options = [apib_json_filepath: "incorrect/path/file.json"]
 
-      assert_raise IncorrectSchemaError, "{:error, :enoent}", fn ->
+      assert_raise IncorrectSchemaError, fn ->
         Plumbapius.Plug.init(init_options)
       end
     end
@@ -190,7 +182,7 @@ defmodule Plumbapius.PlugTest do
     test "parse file with incorrect json structure raise IncorrectSchemaError" do
       init_options = [apib_json_filepath: "test/fixtures/incorrect_schema.json"]
 
-      assert_raise IncorrectSchemaError, "{:error, {:invalid, \"]\", 31}}", fn ->
+      assert_raise IncorrectSchemaError, fn ->
         Plumbapius.Plug.init(init_options)
       end
     end

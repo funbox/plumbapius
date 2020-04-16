@@ -62,13 +62,13 @@ defmodule Plumbapius.Plug do
 
   defp parse_resp_body(body), do: Poison.decode(body)
 
-  defp validate_response({:ok, resp_body}, request_schema, status),
-    do:
-      Response.validate_response(
-        request_schema,
-        status,
-        resp_body
-      )
+  defp validate_response({:ok, resp_body}, request_schema, status) do
+    Response.validate_response(
+      request_schema,
+      status,
+      resp_body
+    )
+  end
 
   defp validate_response(error, _request_schema, _status), do: error
 
