@@ -13,7 +13,7 @@ defmodule Plumbapius.PlugTest do
         |> put_req_header("content-type", "application/json")
 
       assert_raise NotFoundError,
-                   "request \"GET\": \"/sessions\" with content-type: \"application/json\" not found",
+                   ~s(request "GET": "/sessions" with content-type: "application/json" not found),
                    fn ->
                      Plumbapius.Plug.call(
                        conn,
@@ -30,7 +30,41 @@ defmodule Plumbapius.PlugTest do
         |> put_req_header("content-type", "plain/text")
 
       assert_raise NotFoundError,
-                   "request \"POST\": \"/sessions\" with content-type: \"plain/text\" not found",
+                   ~s(request "POST": "/sessions" with content-type: "plain/text" not found),
+                   fn ->
+                     Plumbapius.Plug.call(
+                       conn,
+                       Helper.options(),
+                       &Helper.handle_request_error/1,
+                       &Helper.handle_response_error/1
+                     )
+                   end
+    end
+
+    test "raise Request.NotFoundError when path is not specified for path due with no content-type specified" do
+      conn =
+        conn(:post, "/sessions", %{"login" => "admin", "password" => "admin"})
+        |> delete_req_header("content-type")
+
+      assert_raise NotFoundError,
+                   ~s(request "POST": "/sessions" with content-type: nil not found),
+                   fn ->
+                     Plumbapius.Plug.call(
+                       conn,
+                       Helper.options(),
+                       &Helper.handle_request_error/1,
+                       &Helper.handle_response_error/1
+                     )
+                   end
+    end
+
+    test "raise Request.NotFoundError when path is not specified for path due no method specified" do
+      conn =
+        conn(nil, "/sessions", %{"login" => "admin", "password" => "admin"})
+        |> put_req_header("content-type", "application/json")
+
+      assert_raise NotFoundError,
+                   ~s(request "": "/sessions" with content-type: "application/json" not found),
                    fn ->
                      Plumbapius.Plug.call(
                        conn,
@@ -63,30 +97,46 @@ defmodule Plumbapius.PlugTest do
         conn(:post, "/sessions", %{"foo" => "bar", "password" => "admin"})
         |> put_req_header("content-type", "application/json")
 
-      assert_raise Helper.RequestHandlerRaiseError, "mock raise validation request error", fn ->
-        Plumbapius.Plug.call(
-          conn,
-          Helper.options(),
-          &Helper.handle_request_error/1,
-          &Helper.handle_response_error/1
-        )
-      end
+      assert_raise Helper.RequestHandlerRaiseError,
+                   ~s(Plumpabius.RequestError: %Plumbapius.Request.ErrorDescription{body: %{"foo" => "bar", "password" => "admin"}, error: [{"Required property login was not present.", "#"}], method: "POST", path: "/sessions"}),
+                   fn ->
+                     Plumbapius.Plug.call(
+                       conn,
+                       Helper.options(),
+                       &Helper.handle_request_error/1,
+                       &Helper.handle_response_error/1
+                     )
+                   end
     end
 
     test "raise Helper.ResponseHandlerRaiseError when returns incorrect params" do
       conn = correct_conn_with_response(201, "{\"confirmation\": {\"foo\": \"bar\"}}")
 
-      assert_raise Helper.ResponseHandlerRaiseError, "mock raise validation response error", fn ->
-        send_resp(conn)
-      end
+      assert_raise Helper.ResponseHandlerRaiseError,
+                   ~s(Plumpabius.ResponseError: %Plumbapius.Response.ErrorDescription{body: "{\\"confirmation\\": {\\"foo\\": \\"bar\\"}}", error: "invalid", request: %{method: "POST", path: "/sessions"}, status: 201}),
+                   fn ->
+                     send_resp(conn)
+                   end
     end
 
     test "raise Helper.ResponseHandlerRaiseError when returns incorrect status" do
-      conn = correct_conn_with_response(123, "{\"confirmation\": {\"id\": \"avaFqscDQWcAs\"}}")
+      conn = correct_conn_with_response(123, ~s({"confirmation": {"id": "avaFqscDQWcAs"}}))
 
-      assert_raise Helper.ResponseHandlerRaiseError, "mock raise validation response error", fn ->
-        send_resp(conn)
-      end
+      assert_raise Helper.ResponseHandlerRaiseError,
+                   ~s(Plumpabius.ResponseError: %Plumbapius.Response.ErrorDescription{body: "{\\"confirmation\\": {\\"id\\": \\"avaFqscDQWcAs\\"}}", error: "invalid", request: %{method: "POST", path: "/sessions"}, status: 123}),
+                   fn ->
+                     send_resp(conn)
+                   end
+    end
+
+    test "raise Helper.ResponseHandlerRaiseError when returns incorrect body" do
+      conn = correct_conn_with_response(123, "qwe")
+
+      assert_raise Helper.ResponseHandlerRaiseError,
+                   ~s(Plumpabius.ResponseError: %Plumbapius.Response.ErrorDescription{body: "qwe", error: {:invalid, "q", 0}, request: %{method: "POST", path: "/sessions"}, status: 123}),
+                   fn ->
+                     send_resp(conn)
+                   end
     end
 
     test "returns without exceptions" do

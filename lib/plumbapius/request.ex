@@ -76,9 +76,11 @@ defmodule Plumbapius.Request do
       false
   """
   @spec match?(Request.Schema.t(), String.t(), String.t(), String.t()) :: boolean()
+  def match?(_request_schema, _request_method, nil, _request_content_type), do: false
+
   def match?(request_schema, request_method, request_path, request_content_type) do
-    String.equivalent?(request_method, request_schema.method) &&
-      String.equivalent?(request_content_type, request_schema.content_type) &&
+    request_method == request_schema.method and
+      request_content_type == request_schema.content_type and
       String.match?(request_path, request_schema.path)
   end
 end

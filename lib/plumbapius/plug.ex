@@ -20,16 +20,14 @@ defmodule Plumbapius.Plug do
     Request.validate_request(current_request_schema, conn.body_params)
     |> handle_validation_result(handle_request_error, conn, Request.ErrorDescription)
 
-    Plug.Conn.register_before_send(conn, fn conn ->
-      Response.validate_response(
-        current_request_schema,
-        conn.status,
-        Poison.decode!(conn.resp_body)
-      )
+    register_before_send = fn conn ->
+      validate_response(current_request_schema, conn.resp_body, conn.status)
       |> handle_validation_result(handle_response_error, conn, Response.ErrorDescription)
 
       conn
-    end)
+    end
+
+    Plug.Conn.register_before_send(conn, register_before_send)
   end
 
   defp find_request(request_schemas, request_method, request_path, request_content_type) do
@@ -48,6 +46,24 @@ defmodule Plumbapius.Plug do
         request_schema
     end
   end
+
+  defp validate_response(request_schema, resp_body, status) do
+    case parse_resp_body(resp_body) do
+      {:ok, resp_body} ->
+        Response.validate_response(
+          request_schema,
+          status,
+          resp_body
+        )
+
+      error ->
+        error
+    end
+  end
+
+  defp parse_resp_body(""), do: {:ok, %{}}
+
+  defp parse_resp_body(body), do: Poison.decode(body)
 
   defp handle_validation_result(:ok, _error_handler, _conn, _validation_module), do: :ok
 
