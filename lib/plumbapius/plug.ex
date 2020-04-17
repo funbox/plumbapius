@@ -11,12 +11,11 @@ defmodule Plumbapius.Plug do
   @spec call(Plug.Conn.t(), Options.t(), function, function) ::
           Plug.Conn.t()
   def call(
-        %{private: %{plumbapius_ignore: ignore}} = conn,
+        %{private: %{plumbapius_ignore: true}} = conn,
         _options,
         _handle_request_error,
         _handle_response_error
-      )
-      when ignore do
+      ) do
     conn
   end
 
@@ -60,7 +59,7 @@ defmodule Plumbapius.Plug do
 
   defp parse_resp_body(""), do: {:ok, %{}}
 
-  defp parse_resp_body(body), do: Poison.decode(body)
+  defp parse_resp_body(body), do: Jason.decode(body)
 
   defp validate_response({:ok, resp_body}, request_schema, status) do
     Response.validate_response(
