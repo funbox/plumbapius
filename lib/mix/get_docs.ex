@@ -39,7 +39,7 @@ defmodule Mix.Tasks.Plumbapius.GetDocs do
   end
 
   defp update_gitignore do
-    unless File.stream!(".gitignore") |> Enum.any?(fn str -> str == @apib_workdir end) do
+    unless File.stream!(".gitignore") |> Enum.any?(&String.starts_with?(&1, @apib_workdir)) do
       Logger.info("Updating .gitignore file")
       {:ok, file} = File.open(".gitignore", [:append])
       IO.binwrite(file, @apib_workdir <> "\n")
