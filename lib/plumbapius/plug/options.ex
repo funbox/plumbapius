@@ -24,7 +24,7 @@ defmodule Plumbapius.Plug.Options do
 
   defp parse_apib_json(file_path) do
     with {:ok, body} <- File.read(file_path),
-         {:ok, schema} <- Poison.decode(body) do
+         {:ok, schema} <- Jason.decode(body) do
       schema
     else
       error ->

@@ -1,10 +1,20 @@
 defmodule FakePlugImplementation do
   defmodule RequestHandlerRaiseError do
-    defexception message: "mock raise validation request error"
+    defexception [:error_message]
+
+    @impl true
+    def message(exception) do
+      "Plumpabius.RequestError: #{inspect(exception.error_message)}"
+    end
   end
 
   defmodule ResponseHandlerRaiseError do
-    defexception message: "mock raise validation response error"
+    defexception [:error_message]
+
+    @impl true
+    def message(exception) do
+      "Plumpabius.ResponseError: #{inspect(exception.error_message)}"
+    end
   end
 
   @options %Plumbapius.Plug.Options{
@@ -57,6 +67,16 @@ defmodule FakePlugImplementation do
             },
             content_type: "application/json",
             status: 201
+          },
+          %Plumbapius.Response.Schema{
+            body: %ExJsonSchema.Schema.Root{
+              custom_format_validator: nil,
+              location: :root,
+              refs: %{},
+              schema: %{}
+            },
+            content_type: "application/json",
+            status: 200
           }
         ]
       }
@@ -66,8 +86,8 @@ defmodule FakePlugImplementation do
   def options, do: @options
 
   @spec handle_request_error(map) :: none
-  def handle_request_error(_), do: raise(RequestHandlerRaiseError)
+  def handle_request_error(error), do: raise(%RequestHandlerRaiseError{error_message: error})
 
   @spec handle_response_error(map) :: none
-  def handle_response_error(_), do: raise(ResponseHandlerRaiseError)
+  def handle_response_error(error), do: raise(%ResponseHandlerRaiseError{error_message: error})
 end
