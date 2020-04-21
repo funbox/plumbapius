@@ -23,13 +23,13 @@ end
 
 ### plumbapius.get_docs
 
-`mix plumbapius.get_docs ssh://git@git.funbox.ru/gc/ghetto-auth-apib.git`
+`mix plumbapius.get_docs -c ssh://git@git.funbox.ru/gc/ghetto-auth-apib.git -b master`
 
 Клонирует или обновляет репозиторий с apib в локальную папку в проекте (для случаев, когда apib в отдельной репе).
 
 ### plumbapius.setup_docs
 
-`mix plumbapius.setup_docs ./.apib/api.apib`
+`mix plumbapius.setup_docs --from ./.apib/api.apib --into doc.json`
 
 Преобразует apib в json schema
 
@@ -48,7 +48,7 @@ Plumbapius реализует интерфейс Plug (https://hexdocs.pm/plug/P
 
 - `Plumbapius.Plug.LogValidationError` - только логирует
 - `Plumbapius.Plug.SendToSentryValidationError` - отправляет в Sentry
-- `Plumbapius.Plug.RaiseValidationError` - выбрасывает ошибку, подходит для использования в тестах 
+- `Plumbapius.Plug.RaiseValidationError` - выбрасывает ошибку, подходит для использования в тестах
 
 ## Пример использования
 

@@ -1,20 +1,22 @@
 defmodule Mix.Tasks.Plumbapius.SetupDocs do
   @moduledoc """
-    Transform .apib file from the given path into doc.json using:
+    Transforms .apib file from the given path into doc.json using:
     - crafter (https://bb.funbox.ru/projects/APIB/repos/crafter)
     - tomograph (https://github.com/funbox/tomograph)
 
-    You should install those tools:
+    You should install following tools:
     > npm config set registry https://npm.funbox.io/
     > npm login
     > npm install -g npx
-    > gem install tomograph
+    > gem install tomograph # or add to Gemfile
 
     #Usage
     ```
       mix plumbapius.setup_docs --from ./.apib/api.apib --into doc.json
     ```
   """
+
+  @shortdoc "Transforms apib docs to json schema"
 
   use Mix.Task
 
@@ -57,8 +59,7 @@ defmodule Mix.Tasks.Plumbapius.SetupDocs do
            ]}
 
         _ ->
-          {"tomograph",
-           ["-d", "crafter", "--exclude-description", @temp_yml_filepath, @json_filepath]}
+          {"tomograph", ["-d", "crafter", "--exclude-description", @temp_yml_filepath, @json_filepath]}
       end
 
     System.cmd(cmd, params)

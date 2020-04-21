@@ -28,7 +28,7 @@ defmodule Plumbapius.PlugTest do
         |> put_req_header("content-type", "application/json")
 
       assert_raise NotFoundError,
-                   ~s(request "GET": "/sessions" with content-type: "application/json" not found. Make sure you add content-type: 'application/json'),
+                   matches_text(~s("GET": "/sessions" with content-type: "application/json")),
                    fn ->
                      Plumbapius.Plug.call(
                        conn,
@@ -39,13 +39,13 @@ defmodule Plumbapius.PlugTest do
                    end
     end
 
-    test "raise Request.NotFoundError when path is not specified for path due with content-type" do
+    test "raise Request.NotFoundError when path is not specified for path due to content-type" do
       conn =
         conn(:post, "/sessions", %{"login" => "admin", "password" => "admin"})
         |> put_req_header("content-type", "plain/text")
 
       assert_raise NotFoundError,
-                   ~s(request "POST": "/sessions" with content-type: "plain/text" not found. Make sure you add content-type: 'application/json'),
+                   matches_text(~s("POST": "/sessions" with content-type: "plain/text")),
                    fn ->
                      Plumbapius.Plug.call(
                        conn,
@@ -62,7 +62,7 @@ defmodule Plumbapius.PlugTest do
         |> delete_req_header("content-type")
 
       assert_raise NotFoundError,
-                   ~s(request "POST": "/sessions" with content-type: nil not found. Make sure you add content-type: 'application/json'),
+                   matches_text(~s(request "POST": "/sessions" with content-type: nil)),
                    fn ->
                      Plumbapius.Plug.call(
                        conn,
@@ -79,7 +79,7 @@ defmodule Plumbapius.PlugTest do
         |> put_req_header("content-type", "application/json")
 
       assert_raise NotFoundError,
-                   ~s(request "": "/sessions" with content-type: "application/json" not found. Make sure you add content-type: 'application/json'),
+                   matches_text(~s(request "": "/sessions" with content-type: "application/json")),
                    fn ->
                      Plumbapius.Plug.call(
                        conn,
@@ -96,7 +96,7 @@ defmodule Plumbapius.PlugTest do
         |> put_req_header("content-type", "application/json")
 
       assert_raise NotFoundError,
-                   "request \"POST\": \"/foo-bar\" with content-type: \"application/json\" not found. Make sure you add content-type: 'application/json'",
+                   matches_text(~s(request "POST": "/foo-bar" with content-type: "application/json")),
                    fn ->
                      Plumbapius.Plug.call(
                        conn,
@@ -191,6 +191,10 @@ defmodule Plumbapius.PlugTest do
       init_options = [apib_json_filepath: "test/fixtures/correct_schema.json"]
 
       assert Plumbapius.Plug.init(init_options) == Helper.options()
+    end
+
+    defp matches_text(string) do
+      ~r/#{Regex.escape(string)}/
     end
   end
 end

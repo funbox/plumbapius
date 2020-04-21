@@ -1,12 +1,14 @@
 defmodule Mix.Tasks.Plumbapius.GetDocs do
   @moduledoc """
-    Work with git repo and store it into required folder
+    Clones and updates git repo with apib docs
 
     #Usage
     ```
        mix plumbapius.get_docs -c ssh://git@git.funbox.ru/gc/ghetto-auth-apib.git -d ./path/to/put/repo -b branch-name
     ```
   """
+
+  @shortdoc "Clones and updates git repo with apib docs"
 
   use Mix.Task
 
@@ -15,7 +17,7 @@ defmodule Mix.Tasks.Plumbapius.GetDocs do
   @default_apib_workdir ".apib"
   @default_branch "master"
 
-  @spec run([String.t()]) :: term
+  @impl Mix.Task
   def run(argv) do
     %{options: options} =
       params()

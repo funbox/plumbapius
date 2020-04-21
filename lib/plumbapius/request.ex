@@ -7,16 +7,16 @@ defmodule Plumbapius.Request do
 
     @impl true
     def message(exception) do
-      "request #{inspect(exception.method)}: #{inspect(exception.path)} with content-type: #{
-        inspect(exception.content_type)
-      } not found. Make sure you add content-type: 'application/json'"
+      "request #{inspect(exception.method)}: #{inspect(exception.path)} " <>
+        "with content-type: #{inspect(exception.content_type)} not found. " <>
+        "Make sure you added `content-type: 'application/json'` to your request"
     end
   end
 
   alias Plumbapius.Request
 
   @doc """
-  Validates the request body according to the scheme.
+  Validates request body according to a scheme.
 
   ## Parameters
 
