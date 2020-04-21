@@ -1,11 +1,10 @@
 defmodule Mix.Tasks.Plumbapius.GetDocs do
   @moduledoc """
-    Clones repository from git_clone_uri into local_git_folder folder if local_git_folder does not exist.
-    Otherwise updates local_git_folder repository.
+    Work with git repo and store it into required folder
 
     #Usage
     ```
-       mix plumbapius.get_docs ssh://git@git.funbox.ru/gc/ghetto-auth-apib.git
+       mix plumbapius.get_docs -c ssh://git@git.funbox.ru/gc/ghetto-auth-apib.git -d ./path/to/put/repo -b branch-name
     ```
   """
 
@@ -18,7 +17,8 @@ defmodule Mix.Tasks.Plumbapius.GetDocs do
 
   @spec run([String.t()]) :: term
   def run(argv) do
-    %{options: options} = params() |> Optimus.parse!(argv)
+    %{options: options} = params()
+                          |> Optimus.parse!(argv)
 
     update_repo(options)
     update_gitignore(options.local_stock_folder)
@@ -68,7 +68,7 @@ defmodule Mix.Tasks.Plumbapius.GetDocs do
   defp params do
     Optimus.new!(
       name: "get_docs",
-      description: "Statistic metrics calculator",
+      description: "Git repositories assistant",
       version: "0.1.0",
       author: "Funbox",
       about: "Utility for downloading and updating apib repository",
