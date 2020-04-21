@@ -38,18 +38,28 @@ defmodule Mix.Tasks.Plumbapius.SetupDocs do
   end
 
   defp run_crafter(apib_filepath) do
-    System.cmd("npx", ["@funbox/crafter", apib_filepath],
-      into: File.stream!(@temp_yml_filepath)
-    )
+    System.cmd("npx", ["@funbox/crafter", apib_filepath], into: File.stream!(@temp_yml_filepath))
   end
 
   defp run_tomograph do
-    {cmd, params} = case System.cmd("bundle", ["info", "tomograph"], [stderr_to_stdout: true]) do
-      {_, 0} ->
-        {"bundle", ["exec", "tomograph", "-d", "crafter", "--exclude-description", @temp_yml_filepath, @json_filepath]}
-      _ ->
-        {"tomograph", ["-d", "crafter", "--exclude-description", @temp_yml_filepath, @json_filepath]}
-    end
+    {cmd, params} =
+      case System.cmd("bundle", ["info", "tomograph"], stderr_to_stdout: true) do
+        {_, 0} ->
+          {"bundle",
+           [
+             "exec",
+             "tomograph",
+             "-d",
+             "crafter",
+             "--exclude-description",
+             @temp_yml_filepath,
+             @json_filepath
+           ]}
+
+        _ ->
+          {"tomograph",
+           ["-d", "crafter", "--exclude-description", @temp_yml_filepath, @json_filepath]}
+      end
 
     System.cmd(cmd, params)
   end

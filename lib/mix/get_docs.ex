@@ -17,8 +17,9 @@ defmodule Mix.Tasks.Plumbapius.GetDocs do
 
   @spec run([String.t()]) :: term
   def run(argv) do
-    %{options: options} = params()
-                          |> Optimus.parse!(argv)
+    %{options: options} =
+      params()
+      |> Optimus.parse!(argv)
 
     update_repo(options)
     update_gitignore(options.local_stock_folder)
@@ -34,8 +35,10 @@ defmodule Mix.Tasks.Plumbapius.GetDocs do
 
   defp update_repo(local_git_folder, branch) do
     Logger.info("Updating #{local_git_folder} repository with branch #{branch}")
+
     with {_, 0} <- System.cmd("git", ["-C", local_git_folder, "fetch", "origin", branch]),
-         {_, 0} <- System.cmd("git", ["-C", local_git_folder, "reset", "--hard", "origin/#{branch}"]),
+         {_, 0} <-
+           System.cmd("git", ["-C", local_git_folder, "reset", "--hard", "origin/#{branch}"]),
          {_, 0} <- System.cmd("git", ["-C", local_git_folder, "clean", "-ffdx"]) do
       Logger.info("Repository has been updated successfully")
     else
@@ -46,6 +49,7 @@ defmodule Mix.Tasks.Plumbapius.GetDocs do
 
   defp clone_repo(git_uri, local_folder, branch) do
     Logger.info("Cloning #{git_uri} repository into #{local_folder} with branch #{branch}")
+
     with {_, 0} <- System.cmd("git", ["clone", git_uri, local_folder]),
          {_, 0} <- System.cmd("git", ["checkout", branch]) do
       Logger.info("Repository has been cloned successfully")
@@ -56,7 +60,8 @@ defmodule Mix.Tasks.Plumbapius.GetDocs do
   end
 
   defp update_gitignore(local_stock_folder) do
-    unless File.stream!(".gitignore") |> Enum.any?(&String.starts_with?(&1, local_stock_folder)) do
+    unless File.stream!(".gitignore")
+           |> Enum.any?(&String.starts_with?(&1, local_stock_folder)) do
       Logger.info("Updating .gitignore file")
       {:ok, file} = File.open(".gitignore", [:append])
       IO.binwrite(file, local_stock_folder <> "\n")
@@ -97,7 +102,7 @@ defmodule Mix.Tasks.Plumbapius.GetDocs do
           help: "Required branch in apib repository",
           required: false,
           default: @default_branch
-        ],
+        ]
       ]
     )
   end
