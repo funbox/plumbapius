@@ -1,7 +1,7 @@
 defmodule Mix.Tasks.Plumbapius.GetDocs do
   @moduledoc """
-    Clones repository from git_clone_uri into .apib folder if .apib folder does not exist.
-    Otherwise updates local .apib/ repository.
+    Clones repository from git_clone_uri into local_git_folder folder if local_git_folder does not exist.
+    Otherwise updates local_git_folder repository.
 
     #Usage
     ```
@@ -13,49 +13,92 @@ defmodule Mix.Tasks.Plumbapius.GetDocs do
 
   require Logger
 
-  @apib_workdir ".apib"
+  @default_apib_workdir ".apib"
+  @default_branch "master"
 
-  @spec run(list(String.t())) :: term
-  def run([git_clone_uri]) do
-    Logger.info("Running get_docs command with uri #{git_clone_uri}")
+  @spec run([String.t()]) :: term
+  def run(argv) do
+    %{options: options} = params() |> Optimus.parse!(argv)
 
-    unless File.exists?(@apib_workdir) do
-      clone_repo(git_clone_uri)
+    update_repo(options)
+    update_gitignore(options.local_stock_folder)
+  end
+
+  defp update_repo(options) do
+    unless File.exists?(options.local_stock_folder) do
+      clone_repo(options.git_clone_uri, options.local_stock_folder, options.branch)
     else
-      update_repo()
+      update_repo(options.local_stock_folder, options.branch)
     end
-
-    update_gitignore()
   end
 
-  defp clone_repo(git_clone_uri) do
-    case System.cmd("git", ["clone", git_clone_uri, @apib_workdir]) do
-      {_, 0} ->
-        Logger.info("Repository has been cloned successfully")
-
+  defp update_repo(local_git_folder, branch) do
+    Logger.info("Updating #{local_git_folder} repository with branch #{branch}")
+    with {_, 0} <- System.cmd("git", ["-C", local_git_folder, "fetch", "origin", branch]),
+         {_, 0} <- System.cmd("git", ["-C", local_git_folder, "reset", "--hard", "origin/#{branch}"]),
+         {_, 0} <- System.cmd("git", ["-C", local_git_folder, "clean", "-ffdx"]) do
+      Logger.info("Repository has been updated successfully")
+    else
       error ->
-        Logger.error(inspect(error))
+        raise RuntimeError, inspect(error)
     end
   end
 
-  defp update_gitignore do
-    unless File.stream!(".gitignore") |> Enum.any?(&String.starts_with?(&1, @apib_workdir)) do
+  defp clone_repo(git_uri, local_folder, branch) do
+    Logger.info("Cloning #{git_uri} repository into #{local_folder} with branch #{branch}")
+    with {_, 0} <- System.cmd("git", ["clone", git_uri, local_folder]),
+         {_, 0} <- System.cmd("git", ["checkout", branch]) do
+      Logger.info("Repository has been cloned successfully")
+    else
+      error ->
+        raise RuntimeError, inspect(error)
+    end
+  end
+
+  defp update_gitignore(local_stock_folder) do
+    unless File.stream!(".gitignore") |> Enum.any?(&String.starts_with?(&1, local_stock_folder)) do
       Logger.info("Updating .gitignore file")
       {:ok, file} = File.open(".gitignore", [:append])
-      IO.binwrite(file, @apib_workdir <> "\n")
+      IO.binwrite(file, local_stock_folder <> "\n")
       File.close(file)
       Logger.info(".gitignore file has been updated successfully")
     end
   end
 
-  defp update_repo do
-    with {_, 0} <- System.cmd("git", ["-C", @apib_workdir, "fetch", "origin", "master"]),
-         {_, 0} <- System.cmd("git", ["-C", @apib_workdir, "reset", "--hard", "origin/master"]),
-         {_, 0} <- System.cmd("git", ["-C", @apib_workdir, "clean", "-ffdx"]) do
-      Logger.info("Repository has been updated successfully")
-    else
-      error ->
-        Logger.error(inspect(error))
-    end
+  defp params do
+    Optimus.new!(
+      name: "get_docs",
+      description: "Statistic metrics calculator",
+      version: "0.1.0",
+      author: "Funbox",
+      about: "Utility for downloading and updating apib repository",
+      allow_unknown_args: false,
+      parse_double_dash: true,
+      options: [
+        git_clone_uri: [
+          value_name: "GIT_CLONE_URI",
+          short: "-c",
+          long: "--clone",
+          help: "Clone URI of apib repository",
+          required: true
+        ],
+        local_stock_folder: [
+          value_name: "LOCAL_STOCK_DIRECTORY",
+          short: "-d",
+          long: "--directory",
+          help: "Local directory to stock apib repository",
+          required: false,
+          default: @default_apib_workdir
+        ],
+        branch: [
+          value_name: "BRANCH",
+          short: "-b",
+          long: "--branch",
+          help: "Required branch in apib repository",
+          required: false,
+          default: @default_branch
+        ],
+      ]
+    )
   end
 end

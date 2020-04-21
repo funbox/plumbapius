@@ -50,7 +50,8 @@ defmodule Plumbapius.MixProject do
       {:dialyxir, "~> 1.0", only: [:dev, :test], runtime: false},
       {:credo, "~> 1.2", only: [:dev, :test], runtime: false},
       {:excoveralls, "~> 0.11", only: :test},
-      {:excoveralls_linter, "~> 0.0.2", only: :test}
+      {:excoveralls_linter, "~> 0.0.2", only: :test},
+      {:optimus, "~> 0.1.0"}
     ]
   end
 
