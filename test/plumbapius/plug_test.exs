@@ -28,7 +28,7 @@ defmodule Plumbapius.PlugTest do
         |> put_req_header("content-type", "application/json")
 
       assert_raise NotFoundError,
-                   ~s(request "GET": "/sessions" with content-type: "application/json" not found),
+                   ~s(request "GET": "/sessions" with content-type: "application/json" not found. Make sure you add content-type: 'application/json'),
                    fn ->
                      Plumbapius.Plug.call(
                        conn,
@@ -45,7 +45,7 @@ defmodule Plumbapius.PlugTest do
         |> put_req_header("content-type", "plain/text")
 
       assert_raise NotFoundError,
-                   ~s(request "POST": "/sessions" with content-type: "plain/text" not found),
+                   ~s(request "POST": "/sessions" with content-type: "plain/text" not found. Make sure you add content-type: 'application/json'),
                    fn ->
                      Plumbapius.Plug.call(
                        conn,
@@ -62,7 +62,7 @@ defmodule Plumbapius.PlugTest do
         |> delete_req_header("content-type")
 
       assert_raise NotFoundError,
-                   ~s(request "POST": "/sessions" with content-type: nil not found),
+                   ~s(request "POST": "/sessions" with content-type: nil not found. Make sure you add content-type: 'application/json'),
                    fn ->
                      Plumbapius.Plug.call(
                        conn,
@@ -79,7 +79,7 @@ defmodule Plumbapius.PlugTest do
         |> put_req_header("content-type", "application/json")
 
       assert_raise NotFoundError,
-                   ~s(request "": "/sessions" with content-type: "application/json" not found),
+                   ~s(request "": "/sessions" with content-type: "application/json" not found. Make sure you add content-type: 'application/json'),
                    fn ->
                      Plumbapius.Plug.call(
                        conn,
@@ -96,7 +96,7 @@ defmodule Plumbapius.PlugTest do
         |> put_req_header("content-type", "application/json")
 
       assert_raise NotFoundError,
-                   "request \"POST\": \"/foo-bar\" with content-type: \"application/json\" not found",
+                   "request \"POST\": \"/foo-bar\" with content-type: \"application/json\" not found. Make sure you add content-type: 'application/json'",
                    fn ->
                      Plumbapius.Plug.call(
                        conn,

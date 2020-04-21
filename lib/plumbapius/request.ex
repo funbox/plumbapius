@@ -9,7 +9,7 @@ defmodule Plumbapius.Request do
     def message(exception) do
       "request #{inspect(exception.method)}: #{inspect(exception.path)} with content-type: #{
         inspect(exception.content_type)
-      } not found"
+      } not found. Make sure you add content-type: 'application/json'"
     end
   end
 
