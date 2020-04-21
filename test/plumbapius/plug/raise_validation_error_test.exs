@@ -7,7 +7,7 @@ defmodule Plumbapius.Plug.RaiseValidationErrorTest do
   alias FakePlugImplementation, as: Helper
 
   test "init delegates to base Plug and returns options" do
-    init_options = [apib_json_filepath: "test/fixtures/correct_schema.json"]
+    init_options = [json_schema: File.read!("test/fixtures/correct_schema.json")]
 
     assert RaiseValidationError.init(init_options) == Helper.options()
   end

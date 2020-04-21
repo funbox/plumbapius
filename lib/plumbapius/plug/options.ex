@@ -12,21 +12,21 @@ defmodule Plumbapius.Plug.Options do
           schema: list(Request.Schema.t())
         }
 
-  @spec new(apib_json_filepath: String.t()) :: t()
+  @spec new(json_schema: String.t()) :: t()
   def new(options) do
     %__MODULE__{
       schema:
-        Keyword.fetch!(options, :apib_json_filepath)
+        Keyword.fetch!(options, :json_schema)
         |> parse_apib_json
         |> create_schema
     }
   end
 
-  defp parse_apib_json(file_path) do
-    with {:ok, body} <- File.read(file_path),
-         {:ok, schema} <- Jason.decode(body) do
-      schema
-    else
+  defp parse_apib_json(body) do
+    case Jason.decode(body) do
+      {:ok, schema} ->
+        schema
+
       error ->
         raise IncorrectSchemaError, message: "#{inspect(error)}"
     end

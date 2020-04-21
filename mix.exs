@@ -4,7 +4,7 @@ defmodule Plumbapius.MixProject do
   def project do
     [
       app: :plumbapius,
-      version: "0.2.0",
+      version: "0.3.0",
       elixir: "~> 1.10.0",
       deps: deps(),
       start_permanent: Mix.env() == :prod,

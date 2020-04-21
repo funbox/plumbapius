@@ -171,16 +171,8 @@ defmodule Plumbapius.PlugTest do
   end
 
   describe "test init method" do
-    test "parse file which does not exist raise IncorrectSchemaError" do
-      init_options = [apib_json_filepath: "incorrect/path/file.json"]
-
-      assert_raise IncorrectSchemaError, fn ->
-        Plumbapius.Plug.init(init_options)
-      end
-    end
-
     test "parse file with incorrect json structure raise IncorrectSchemaError" do
-      init_options = [apib_json_filepath: "test/fixtures/incorrect_schema.json"]
+      init_options = [json_schema: File.read!("test/fixtures/incorrect_schema.json")]
 
       assert_raise IncorrectSchemaError, fn ->
         Plumbapius.Plug.init(init_options)
@@ -188,7 +180,7 @@ defmodule Plumbapius.PlugTest do
     end
 
     test "parse correct json file" do
-      init_options = [apib_json_filepath: "test/fixtures/correct_schema.json"]
+      init_options = [json_schema: File.read!("test/fixtures/correct_schema.json")]
 
       assert Plumbapius.Plug.init(init_options) == Helper.options()
     end

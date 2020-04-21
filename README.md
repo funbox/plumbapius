@@ -8,7 +8,7 @@ Plumbapius служит для валидации http запросов/отве
 ```
 def deps do
   [
-    {:plumbapius, "~> 0.1.0", repo: :funbox}
+    {:plumbapius, "~> 0.3.0", repo: :funbox}
   ]
 end
 ```
@@ -58,13 +58,11 @@ router.exs
 defmodule DogeApp.Api.Router do
   use DogeApp.Api, :router
 
-  @json_schema_path "../../doc.json"
+  @json_schema File.read!("../../doc.json")
 
   pipeline :api do
     plug(:accepts, ["json"])
-
-    if File.exists?(@json_schema_path),
-      do: plug(Application.get_env(:doge_app, :plumbapius_plug), apib_json_filepath: @json_schema_path)
+    plug(Application.get_env(:doge_app, :plumbapius_plug), json_schema: @json_schema)
   end
 
  # ...

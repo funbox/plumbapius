@@ -3,7 +3,7 @@ defmodule Plumbapius.Plug do
   alias Plumbapius.Response
   alias Plumbapius.Plug.Options
 
-  @spec init(apib_json_filepath: String.t()) :: Options.t()
+  @spec init(json_schema: String.t()) :: Options.t()
   def init(options) do
     Options.new(options)
   end
