@@ -1,4 +1,7 @@
 {
+    "skip_files": [
+        "lib/mix"
+    ],
     "custom_stop_words": [
         "ExcError.define"
     ],

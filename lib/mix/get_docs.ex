@@ -23,6 +23,7 @@ defmodule Mix.Tasks.Plumbapius.GetDocs do
       %{options: options} ->
         update_repo.(options.git_clone_uri, options.local_stock_folder, options.branch)
         update_gitignore.(options.local_stock_folder)
+
       error ->
         error
     end
