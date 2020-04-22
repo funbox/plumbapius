@@ -21,7 +21,10 @@ defmodule Plumbapius.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       test_coverage: [tool: ExCoveralls],
       package: package(),
-      description: "Plumbapius"
+      description: "Plumbapius",
+      dialyzer: [
+        plt_add_apps: [:mix]
+      ]
     ]
   end
 
@@ -51,7 +54,7 @@ defmodule Plumbapius.MixProject do
       {:credo, "~> 1.2", only: [:dev, :test], runtime: false},
       {:excoveralls, "~> 0.11", only: :test},
       {:excoveralls_linter, "~> 0.0.2", only: :test},
-      {:optimus, "~> 0.1.0"}
+      {:optimus, "~> 0.1.9"}
     ]
   end
 
