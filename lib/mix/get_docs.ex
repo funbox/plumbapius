@@ -18,20 +18,21 @@ defmodule Mix.Tasks.Plumbapius.GetDocs do
   @default_branch "master"
 
   @impl Mix.Task
-  def run(argv) do
-    %{options: options} =
-      params()
-      |> Optimus.parse!(argv)
-
-    update_repo(options)
-    update_gitignore(options.local_stock_folder)
+  def run(argv, update_repo \\ &update_repo/3, update_gitignore \\ &update_gitignore/1, halt \\ &System.halt/1) do
+    case params() |> Optimus.parse!(argv, halt) do
+      %{options: options} ->
+        update_repo.(options.git_clone_uri, options.local_stock_folder, options.branch)
+        update_gitignore.(options.local_stock_folder)
+      error ->
+        error
+    end
   end
 
-  defp update_repo(options) do
-    unless File.exists?(options.local_stock_folder) do
-      clone_repo(options.git_clone_uri, options.local_stock_folder, options.branch)
+  defp update_repo(uri, local_folder, branch) do
+    unless File.exists?(local_folder) do
+      clone_repo(uri, local_folder, branch)
     else
-      update_repo(options.local_stock_folder, options.branch)
+      update_repo(local_folder, branch)
     end
   end
 

@@ -23,27 +23,27 @@ defmodule Mix.Tasks.Plumbapius.SetupDocs do
   require Logger
 
   @temp_yml_filepath "doc.yml"
-  @json_filepath "doc.json"
+  @default_json_filepath "doc.json"
 
-  @spec run([String.t()]) :: term
-  def run(argv) do
-    with %{options: options} <- params() |> Optimus.parse!(argv),
-         {_, 0} <- run_crafter(options.apib_filepath),
-         {_, 0} <- run_tomograph() do
-      Logger.info("Docs have been parsed successfully into #{@json_filepath}")
+  @impl Mix.Task
+  def run(argv, run_crafter \\ &run_crafter/1, run_tomograph \\ &run_tomograph/1, halt \\ &System.halt/1) do
+    with %{options: options} <- params() |> Optimus.parse!(argv, halt),
+         {_, 0} <- run_crafter.(options.apib_filepath),
+         {_, 0} <- run_tomograph.(options.json_filepath) do
+      File.rm(@temp_yml_filepath)
+      Logger.info("Docs have been parsed successfully into #{options.json_filepath}")
     else
       error ->
-        Logger.error(inspect(error))
+        File.rm(@temp_yml_filepath)
+        error
     end
-
-    File.rm(@temp_yml_filepath)
   end
 
   defp run_crafter(apib_filepath) do
     System.cmd("npx", ["@funbox/crafter", apib_filepath], into: File.stream!(@temp_yml_filepath))
   end
 
-  defp run_tomograph do
+  defp run_tomograph(json_filepath) do
     {cmd, params} =
       case System.cmd("bundle", ["info", "tomograph"], stderr_to_stdout: true) do
         {_, 0} ->
@@ -55,11 +55,11 @@ defmodule Mix.Tasks.Plumbapius.SetupDocs do
              "crafter",
              "--exclude-description",
              @temp_yml_filepath,
-             @json_filepath
+             json_filepath
            ]}
 
         _ ->
-          {"tomograph", ["-d", "crafter", "--exclude-description", @temp_yml_filepath, @json_filepath]}
+          {"tomograph", ["-d", "crafter", "--exclude-description", @temp_yml_filepath, json_filepath]}
       end
 
     System.cmd(cmd, params)
@@ -87,7 +87,8 @@ defmodule Mix.Tasks.Plumbapius.SetupDocs do
           short: "-i",
           long: "--into",
           help: "Output .json filepath",
-          required: true
+          required: false,
+          default: @default_json_filepath
         ]
       ]
     )
