@@ -3,11 +3,12 @@ defmodule Plumbapius.Plug.SendToSentryValidationError do
 
   alias Plumbapius.Request
   alias Plumbapius.Response
+  alias Plumbapius.AbstractPlug
 
-  defdelegate init(options), to: Plumbapius.Plug
+  defdelegate init(options), to: AbstractPlug
 
   @impl Plug
-  def call(conn, opts, plug_module \\ Plumbapius.Plug, sentry \\ Sentry) do
+  def call(conn, opts, plug_module \\ AbstractPlug, sentry \\ Sentry) do
     plug_module.call(
       conn,
       opts,

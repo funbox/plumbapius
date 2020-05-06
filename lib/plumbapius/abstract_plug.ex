@@ -1,4 +1,4 @@
-defmodule Plumbapius.Plug do
+defmodule Plumbapius.AbstractPlug do
   alias Plumbapius.Request
   alias Plumbapius.Response
   alias Plumbapius.Plug.Options

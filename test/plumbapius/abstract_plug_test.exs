@@ -5,6 +5,7 @@ defmodule Plumbapius.PlugTest do
   alias FakePlugImplementation, as: Helper
   alias Plumbapius.Plug.Options.IncorrectSchemaError
   alias Plumbapius.Request.NotFoundError
+  alias Plumbapius.AbstractPlug
 
   describe "test call method" do
     test "returns conn even for incorrect request but with Plumbapius.ignore command" do
@@ -14,7 +15,7 @@ defmodule Plumbapius.PlugTest do
         |> Plumbapius.ignore()
 
       assert conn ==
-               Plumbapius.Plug.call(
+               AbstractPlug.call(
                  conn,
                  Helper.options(),
                  &Helper.handle_request_error/1,
@@ -30,7 +31,7 @@ defmodule Plumbapius.PlugTest do
       assert_raise NotFoundError,
                    matches_text(~s("GET": "/sessions" with content-type: "application/json")),
                    fn ->
-                     Plumbapius.Plug.call(
+                     AbstractPlug.call(
                        conn,
                        Helper.options(),
                        &Helper.handle_request_error/1,
@@ -47,7 +48,7 @@ defmodule Plumbapius.PlugTest do
       assert_raise NotFoundError,
                    matches_text(~s("POST": "/sessions" with content-type: "plain/text")),
                    fn ->
-                     Plumbapius.Plug.call(
+                     AbstractPlug.call(
                        conn,
                        Helper.options(),
                        &Helper.handle_request_error/1,
@@ -64,7 +65,7 @@ defmodule Plumbapius.PlugTest do
       assert_raise NotFoundError,
                    matches_text(~s(request "POST": "/sessions" with content-type: nil)),
                    fn ->
-                     Plumbapius.Plug.call(
+                     AbstractPlug.call(
                        conn,
                        Helper.options(),
                        &Helper.handle_request_error/1,
@@ -81,7 +82,7 @@ defmodule Plumbapius.PlugTest do
       assert_raise NotFoundError,
                    matches_text(~s(request "": "/sessions" with content-type: "application/json")),
                    fn ->
-                     Plumbapius.Plug.call(
+                     AbstractPlug.call(
                        conn,
                        Helper.options(),
                        &Helper.handle_request_error/1,
@@ -98,7 +99,7 @@ defmodule Plumbapius.PlugTest do
       assert_raise NotFoundError,
                    matches_text(~s(request "POST": "/foo-bar" with content-type: "application/json")),
                    fn ->
-                     Plumbapius.Plug.call(
+                     AbstractPlug.call(
                        conn,
                        Helper.options(),
                        &Helper.handle_request_error/1,
@@ -115,7 +116,7 @@ defmodule Plumbapius.PlugTest do
       assert_raise Helper.RequestHandlerRaiseError,
                    ~s(Plumpabius.RequestError: %Plumbapius.Request.ErrorDescription{body: %{"foo" => "bar", "password" => "admin"}, error: [{"Required property login was not present.", "#"}], method: "POST", path: "/sessions"}),
                    fn ->
-                     Plumbapius.Plug.call(
+                     AbstractPlug.call(
                        conn,
                        Helper.options(),
                        &Helper.handle_request_error/1,
@@ -161,7 +162,7 @@ defmodule Plumbapius.PlugTest do
     defp correct_conn_with_response(status, body) do
       conn(:post, "/sessions", %{"login" => "admin", "password" => "admin"})
       |> put_req_header("content-type", "application/json")
-      |> Plumbapius.Plug.call(
+      |> AbstractPlug.call(
         Helper.options(),
         &Helper.handle_request_error/1,
         &Helper.handle_response_error/1
@@ -175,14 +176,14 @@ defmodule Plumbapius.PlugTest do
       init_options = [json_schema: File.read!("test/fixtures/incorrect_schema.json")]
 
       assert_raise IncorrectSchemaError, fn ->
-        Plumbapius.Plug.init(init_options)
+        AbstractPlug.init(init_options)
       end
     end
 
     test "parse correct json file" do
       init_options = [json_schema: File.read!("test/fixtures/correct_schema.json")]
 
-      assert Plumbapius.Plug.init(init_options) == Helper.options()
+      assert AbstractPlug.init(init_options) == Helper.options()
     end
 
     defp matches_text(string) do

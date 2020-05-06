@@ -3,8 +3,9 @@ defmodule Plumbapius.Plug.RaiseValidationError do
 
   alias Plumbapius.Request
   alias Plumbapius.Response
+  alias Plumbapius.AbstractPlug
 
-  defdelegate init(options), to: Plumbapius.Plug
+  defdelegate init(options), to: AbstractPlug
 
   defmodule RequestError do
     defexception [:error_message]
@@ -25,7 +26,7 @@ defmodule Plumbapius.Plug.RaiseValidationError do
   end
 
   @impl Plug
-  def call(conn, opts, plug_module \\ Plumbapius.Plug) do
+  def call(conn, opts, plug_module \\ AbstractPlug) do
     plug_module.call(conn, opts, &handle_request_error/1, &handle_response_error/1)
   end
 
