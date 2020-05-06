@@ -2,6 +2,7 @@ defmodule Plumbapius.AbstractPlug do
   alias Plumbapius.Request
   alias Plumbapius.Response
   alias Plumbapius.Plug.Options
+  alias Plug.Conn
 
   @spec init(json_schema: String.t()) :: Options.t()
   def init(options) do
@@ -20,13 +21,9 @@ defmodule Plumbapius.AbstractPlug do
   end
 
   def call(conn, options, handle_request_error, handle_response_error) do
-    content_type = Plug.Conn.get_req_header(conn, "content-type") |> Enum.at(0)
+    current_request_schema = find_request_schema(options.schema, conn)
 
-    current_request_schema =
-      options.schema
-      |> find_request(conn.method, conn.request_path, content_type)
-
-    Request.validate_request(current_request_schema, conn.body_params)
+    Request.validate(current_request_schema, conn.body_params)
     |> handle_validation_result(handle_request_error, conn, Request.ErrorDescription)
 
     register_before_send = fn conn ->
@@ -40,25 +37,51 @@ defmodule Plumbapius.AbstractPlug do
     Plug.Conn.register_before_send(conn, register_before_send)
   end
 
-  defp find_request(request_schemas, request_method, request_path, request_content_type) do
-    case Enum.find(
-           request_schemas,
-           &Request.match?(&1, request_method, request_path, request_content_type)
-         ) do
-      nil ->
-        raise %Request.NotFoundError{
-          method: request_method,
-          path: request_path,
-          content_type: request_content_type
-        }
+  defp find_request_schema(request_schemas, conn) do
+    schema_candidates = Enum.filter(request_schemas, &Request.match?(&1, conn.method, conn.request_path))
 
-      request_schema ->
-        request_schema
+    if Enum.empty?(schema_candidates) do
+      raise %Request.NotFoundError{
+        method: conn.method,
+        path: conn.request_path
+      }
+    end
+
+    content_type = content_type_for(conn)
+    request_schema = Enum.find(schema_candidates, &Request.match_content_type?(&1, content_type))
+
+    unless request_schema do
+      raise %Request.UnknownContentTypeError{
+        method: conn.method,
+        path: conn.request_path,
+        content_type: content_type
+      }
+    end
+
+    request_schema
+  end
+
+  defp content_type_for(conn) do
+    if has_body?(conn) do
+      content_type = get_req_header(conn, "content-type")
+
+      unless content_type do
+        raise %Request.NoContentTypeError{method: conn.method, path: conn.request_path}
+      end
+
+      content_type
+    else
+      nil
     end
   end
 
-  defp parse_resp_body(""), do: {:ok, %{}}
+  defp has_body?(conn) do
+    conn.method in ["POST", "PUT", "PATCH"]
+  end
 
+  defp get_req_header(conn, name), do: conn |> Conn.get_req_header(name) |> Enum.at(0)
+
+  defp parse_resp_body(""), do: {:ok, %{}}
   defp parse_resp_body(body), do: Jason.decode(body)
 
   defp validate_response({:ok, resp_body}, request_schema, status) do

@@ -1,7 +1,7 @@
 defmodule Plumbapius.Request.Schema do
   @moduledoc "Describes the request schema for validation"
 
-  @enforce_keys [:method, :path, :content_type, :body]
+  @enforce_keys [:method, :path]
   defstruct [:method, :path, :content_type, :body, responses: []]
 
   @typedoc "Request Schema"

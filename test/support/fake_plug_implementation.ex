@@ -79,6 +79,29 @@ defmodule FakePlugImplementation do
             status: 200
           }
         ]
+      },
+      %Plumbapius.Request.Schema{
+        method: "GET",
+        path: ~r/\A\/users\z/,
+        content_type: nil,
+        body: %ExJsonSchema.Schema.Root{
+          custom_format_validator: nil,
+          location: :root,
+          refs: %{},
+          schema: %{}
+        },
+        responses: [
+          %Plumbapius.Response.Schema{
+            body: %ExJsonSchema.Schema.Root{
+              custom_format_validator: nil,
+              location: :root,
+              refs: %{},
+              schema: %{}
+            },
+            content_type: "application/json",
+            status: 200
+          }
+        ]
       }
     ]
   }

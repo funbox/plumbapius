@@ -3,44 +3,43 @@ defmodule Plumbapius.RequestTest do
   doctest Plumbapius.Request
   alias Plumbapius.Request
 
-  describe "Plumbapius.Request.validate_request/2" do
+  describe "Plumbapius.Request.validate/2" do
     test "when the request according to the scheme" do
       request_body = %{"msisdn" => 123}
 
-      assert Request.validate_request(request_schema(), request_body) == :ok
+      assert Request.validate(request_schema(), request_body) == :ok
     end
 
     test "when the msisdn in the request is string" do
       request_body = %{"msisdn" => "123"}
 
-      assert Request.validate_request(request_schema(), request_body) ==
+      assert Request.validate(request_schema(), request_body) ==
                {:error, [{"Type mismatch. Expected Number but got String.", "#/msisdn"}]}
     end
   end
 
   describe "Plumbapius.Request.match?/3" do
-    test "when the schema matches for the request" do
-      request_method = "GET"
-      request_path = "/users/1"
-      content_type = "application/json"
-
-      assert Request.match?(request_schema(), request_method, request_path, content_type)
+    test "when schema matches with the request" do
+      assert Request.match?(request_schema(), "GET", "/users/1")
     end
 
-    test "when the request has a different method" do
-      request_method = "GET"
-      request_path = "/users"
-      content_type = "application/json"
-
-      refute Request.match?(request_schema(), request_method, request_path, content_type)
+    test "when request has a different method" do
+      refute Request.match?(request_schema(), "GET", "/users")
     end
 
-    test "when the request has a different path" do
-      request_method = "POST"
-      request_path = "/users/1"
-      content_type = "application/json"
+    test "when request has a different path" do
+      refute Request.match?(request_schema(), "POST", "/users/1")
+    end
+  end
 
-      refute Request.match?(request_schema(), request_method, request_path, content_type)
+  describe "Plumbapius.Request.match_content_type?/2" do
+    test "always matches missing content type" do
+      assert Request.match_content_type?(request_schema(), nil)
+    end
+
+    test "matches content type" do
+      assert Request.match_content_type?(request_schema(), "application/json")
+      refute Request.match_content_type?(request_schema(), "doge/dummy")
     end
   end
 

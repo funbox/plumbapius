@@ -4,169 +4,103 @@ defmodule Plumbapius.PlugTest do
 
   alias FakePlugImplementation, as: Helper
   alias Plumbapius.Plug.Options.IncorrectSchemaError
-  alias Plumbapius.Request.NotFoundError
+  alias Plumbapius.Request.{NotFoundError, UnknownContentTypeError, NoContentTypeError}
   alias Plumbapius.AbstractPlug
 
   describe "test call method" do
-    test "returns conn even for incorrect request but with Plumbapius.ignore command" do
+    test "returns conn even for incorrect request when Plumbapius.ignore() is used" do
       conn =
         conn(:get, "/sessions", %{"login" => "admin", "password" => "admin"})
         |> put_req_header("content-type", "application/json")
         |> Plumbapius.ignore()
 
-      assert conn ==
-               AbstractPlug.call(
-                 conn,
-                 Helper.options(),
-                 &Helper.handle_request_error/1,
-                 &Helper.handle_response_error/1
-               )
+      assert conn == call_plug(conn)
     end
 
-    test "raise Request.NotFoundError when path is not specified for path due with method" do
-      conn =
-        conn(:get, "/sessions", %{"login" => "admin", "password" => "admin"})
-        |> put_req_header("content-type", "application/json")
+    test "raises error when path exists in schema but method is wrong" do
+      conn = conn(:get, "/sessions", %{"login" => "admin", "password" => "admin"})
 
-      assert_raise NotFoundError,
-                   matches_text(~s("GET": "/sessions" with content-type: "application/json")),
-                   fn ->
-                     AbstractPlug.call(
-                       conn,
-                       Helper.options(),
-                       &Helper.handle_request_error/1,
-                       &Helper.handle_response_error/1
-                     )
-                   end
+      assert_raise NotFoundError, fn -> call_plug(conn) end
     end
 
-    test "raise Request.NotFoundError when path is not specified for path due to content-type" do
+    test "raises error when content-type header does not match specified in schema" do
       conn =
         conn(:post, "/sessions", %{"login" => "admin", "password" => "admin"})
         |> put_req_header("content-type", "plain/text")
 
-      assert_raise NotFoundError,
-                   matches_text(~s("POST": "/sessions" with content-type: "plain/text")),
-                   fn ->
-                     AbstractPlug.call(
-                       conn,
-                       Helper.options(),
-                       &Helper.handle_request_error/1,
-                       &Helper.handle_response_error/1
-                     )
-                   end
+      assert_raise UnknownContentTypeError, fn -> call_plug(conn) end
     end
 
-    test "raise Request.NotFoundError when path is not specified for path due with no content-type specified" do
-      conn =
-        conn(:post, "/sessions", %{"login" => "admin", "password" => "admin"})
-        |> delete_req_header("content-type")
-
-      assert_raise NotFoundError,
-                   matches_text(~s(request "POST": "/sessions" with content-type: nil)),
-                   fn ->
-                     AbstractPlug.call(
-                       conn,
-                       Helper.options(),
-                       &Helper.handle_request_error/1,
-                       &Helper.handle_response_error/1
-                     )
-                   end
+    test "raises error when content-type header is missing in post request" do
+      conn = conn(:post, "/sessions")
+      assert_raise NoContentTypeError, fn -> call_plug(conn) end
     end
 
-    test "raise Request.NotFoundError when path is not specified for path due no method specified" do
-      conn =
-        conn(nil, "/sessions", %{"login" => "admin", "password" => "admin"})
-        |> put_req_header("content-type", "application/json")
-
-      assert_raise NotFoundError,
-                   matches_text(~s(request "": "/sessions" with content-type: "application/json")),
-                   fn ->
-                     AbstractPlug.call(
-                       conn,
-                       Helper.options(),
-                       &Helper.handle_request_error/1,
-                       &Helper.handle_response_error/1
-                     )
-                   end
+    test "raises error when method is not specified" do
+      conn = conn(nil, "/sessions", %{"login" => "admin", "password" => "admin"})
+      assert_raise NotFoundError, fn -> call_plug(conn) end
     end
 
-    test "raise Request.NotFoundError when path is not specified for path due with path" do
+    test "raises error when path is not present in schema" do
       conn =
         conn(:post, "/foo-bar", %{"login" => "admin", "password" => "admin"})
         |> put_req_header("content-type", "application/json")
 
-      assert_raise NotFoundError,
-                   matches_text(~s(request "POST": "/foo-bar" with content-type: "application/json")),
-                   fn ->
-                     AbstractPlug.call(
-                       conn,
-                       Helper.options(),
-                       &Helper.handle_request_error/1,
-                       &Helper.handle_response_error/1
-                     )
-                   end
+      assert_raise NotFoundError, fn -> call_plug(conn) end
     end
 
-    test "raise Helper.RequestHandlerRaiseError when pass incorrect params" do
+    test "raises error when request params are incorrect" do
       conn =
         conn(:post, "/sessions", %{"foo" => "bar", "password" => "admin"})
         |> put_req_header("content-type", "application/json")
 
-      assert_raise Helper.RequestHandlerRaiseError,
-                   ~s(Plumpabius.RequestError: %Plumbapius.Request.ErrorDescription{body: %{"foo" => "bar", "password" => "admin"}, error: [{"Required property login was not present.", "#"}], method: "POST", path: "/sessions"}),
-                   fn ->
-                     AbstractPlug.call(
-                       conn,
-                       Helper.options(),
-                       &Helper.handle_request_error/1,
-                       &Helper.handle_response_error/1
-                     )
-                   end
+      assert_raise Helper.RequestHandlerRaiseError, fn -> call_plug(conn) end
     end
 
-    test "raise Helper.ResponseHandlerRaiseError when returns incorrect params" do
-      conn = correct_conn_with_response(201, "{\"confirmation\": {\"foo\": \"bar\"}}")
+    test "raises error when response has incorrect body params" do
+      conn = post_request(201, "{\"confirmation\": {\"foo\": \"bar\"}}")
 
       assert_raise Helper.ResponseHandlerRaiseError,
                    ~s(Plumpabius.ResponseError: %Plumbapius.Response.ErrorDescription{body: "{\\"confirmation\\": {\\"foo\\": \\"bar\\"}}", error: "invalid", request: %{method: "POST", path: "/sessions"}, status: 201}),
                    fn -> send_resp(conn) end
     end
 
-    test "raise Helper.ResponseHandlerRaiseError when returns incorrect status" do
-      conn = correct_conn_with_response(123, ~s({"confirmation": {"id": "avaFqscDQWcAs"}}))
+    test "raises error when response returns incorrect status" do
+      conn = post_request(123, ~s({"confirmation": {"id": "avaFqscDQWcAs"}}))
 
       assert_raise Helper.ResponseHandlerRaiseError,
                    ~s(Plumpabius.ResponseError: %Plumbapius.Response.ErrorDescription{body: "{\\"confirmation\\": {\\"id\\": \\"avaFqscDQWcAs\\"}}", error: "invalid", request: %{method: "POST", path: "/sessions"}, status: 123}),
                    fn -> send_resp(conn) end
     end
 
-    test "raise Helper.ResponseHandlerRaiseError when returns incorrect body" do
-      conn = correct_conn_with_response(123, "qwe")
-
+    test "raises error when response returns incorrect json" do
+      conn = post_request(123, "qwe")
       assert_raise Helper.ResponseHandlerRaiseError, fn -> send_resp(conn) end
     end
 
     test "returns without exceptions for empty response body" do
-      conn = correct_conn_with_response(200, "")
+      conn = post_request(200, "")
+      send_resp(conn)
+    end
+
+    test "returns without exceptions for post requests" do
+      conn = post_request(201, "{\"confirmation\": {\"id\": \"afqWDXAcaWacW\"}}")
+      send_resp(conn)
+    end
+
+    test "returns without exceptions for get requests" do
+      conn =
+        conn(:get, "/users")
+        |> call_plug()
+        |> resp(200, "{}")
 
       send_resp(conn)
     end
 
-    test "returns without exceptions" do
-      conn = correct_conn_with_response(201, "{\"confirmation\": {\"id\": \"afqWDXAcaWacW\"}}")
-
-      send_resp(conn)
-    end
-
-    defp correct_conn_with_response(status, body) do
+    defp post_request(status, body) do
       conn(:post, "/sessions", %{"login" => "admin", "password" => "admin"})
       |> put_req_header("content-type", "application/json")
-      |> AbstractPlug.call(
-        Helper.options(),
-        &Helper.handle_request_error/1,
-        &Helper.handle_response_error/1
-      )
+      |> call_plug()
       |> resp(status, body)
     end
   end
@@ -174,20 +108,21 @@ defmodule Plumbapius.PlugTest do
   describe "test init method" do
     test "parse file with incorrect json structure raise IncorrectSchemaError" do
       init_options = [json_schema: File.read!("test/fixtures/incorrect_schema.json")]
-
-      assert_raise IncorrectSchemaError, fn ->
-        AbstractPlug.init(init_options)
-      end
+      assert_raise IncorrectSchemaError, fn -> AbstractPlug.init(init_options) end
     end
 
     test "parse correct json file" do
       init_options = [json_schema: File.read!("test/fixtures/correct_schema.json")]
-
       assert AbstractPlug.init(init_options) == Helper.options()
     end
+  end
 
-    defp matches_text(string) do
-      ~r/#{Regex.escape(string)}/
-    end
+  def call_plug(conn) do
+    AbstractPlug.call(
+      conn,
+      Helper.options(),
+      &Helper.handle_request_error/1,
+      &Helper.handle_response_error/1
+    )
   end
 end
