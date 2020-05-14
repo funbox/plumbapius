@@ -24,7 +24,7 @@ defmodule FakePlug do
       method: "get",
       path: "/fake/path",
       body: %{"foo" => "bar"},
-      error: [{"Type mismatch. Expected Number but got String.", "#/msisdn"}]
+      error: "some_error"
     }
 
   defp response_error,

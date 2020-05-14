@@ -58,7 +58,12 @@ router.exs
 defmodule DogeApp.Api.Router do
   use DogeApp.Api, :router
 
-  @json_schema File.read!("../../doc.json")
+  @json_schema_path "../../doc.json"
+
+  # Файл вкомпиливается в модуль, поэтому при изменении файла,
+  # необходимо перекомпилировать модуль
+  @external_resource @json_schema_path
+  @json_schema File.read!(@json_schema_path)
 
   pipeline :api do
     plug(:accepts, ["json"])

@@ -14,15 +14,13 @@ defmodule Plumbapius.Plug.LogValidationErrorTest do
   test "log request error" do
     assert capture_log(fn ->
              LogValidationError.call(:request_error, nil, FakePlug)
-           end) =~
-             ~s([warn]  Plumbapius.RequestError: %Plumbapius.Request.ErrorDescription{body: %{"foo" => "bar"}, error: [{"Type mismatch. Expected Number but got String.", "#/msisdn"}], method: "get", path: "/fake/path"})
+           end) =~ ~r/Plumbapius.RequestError/
   end
 
   test "log response error" do
     assert capture_log(fn ->
              LogValidationError.call(:response_error, nil, FakePlug)
-           end) =~
-             ~s([warn]  Plumbapius.ResponseError: %Plumbapius.Response.ErrorDescription{body: ["{", "foo", ":", "bar", "}"], error: "invalid", request: %{method: "get", path: "/fake/path"}, status: 200})
+           end) =~ ~r/Plumbapius.ResponseError/
   end
 
   test "log request and response error" do
@@ -31,11 +29,8 @@ defmodule Plumbapius.Plug.LogValidationErrorTest do
         LogValidationError.call(:both, nil, FakePlug)
       end)
 
-    assert logs =~
-             ~s([warn]  Plumbapius.RequestError: %Plumbapius.Request.ErrorDescription{body: %{"foo" => "bar"}, error: [{"Type mismatch. Expected Number but got String.", "#/msisdn"}], method: "get", path: "/fake/path"})
-
-    assert logs =~
-             ~s([warn]  Plumbapius.ResponseError: %Plumbapius.Response.ErrorDescription{body: ["{", "foo", ":", "bar", "}"], error: "invalid", request: %{method: "get", path: "/fake/path"}, status: 200})
+    assert logs =~ ~r/Plumbapius.RequestError/
+    assert logs =~ ~r/Plumbapius.ResponseError/
   end
 
   test "plug return call result" do

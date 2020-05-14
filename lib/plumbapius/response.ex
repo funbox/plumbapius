@@ -42,9 +42,9 @@ defmodule Plumbapius.Response do
       iex> Plumbapius.Response.validate_response(request_schema, 200, %{"field_name" => "foobar"})
       :ok
       iex> Plumbapius.Response.validate_response(request_schema, 200, %{"another_field_name" => "12345"})
-      {:error, "invalid"}
+      {:error, "no_such_response_in_schema"}
       iex> Plumbapius.Response.validate_response(request_schema, 401, %{"field_name" => "foobar"})
-      {:error, "invalid"}
+      {:error, "no_such_response_in_schema"}
 
   """
   @spec validate_response(Request.Schema.t(), non_neg_integer, map) :: :ok | {:error, String.t()}
@@ -70,6 +70,6 @@ defmodule Plumbapius.Response do
   end
 
   defp validate([], _response_body) do
-    {:error, "invalid"}
+    {:error, "no_such_response_in_schema"}
   end
 end

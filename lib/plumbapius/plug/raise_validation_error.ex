@@ -8,20 +8,20 @@ defmodule Plumbapius.Plug.RaiseValidationError do
   defdelegate init(options), to: AbstractPlug
 
   defmodule RequestError do
-    defexception [:error_message]
+    defexception [:description]
 
     @impl true
     def message(exception) do
-      "Plumpabius.RequestError: #{inspect(exception.error_message)}"
+      "Plumpabius.RequestError: #{exception.description}"
     end
   end
 
   defmodule ResponseError do
-    defexception [:error_message]
+    defexception [:description]
 
     @impl true
     def message(exception) do
-      "Plumpabius.ResponseError: #{inspect(exception.error_message)}"
+      "Plumpabius.ResponseError: #{exception.description}"
     end
   end
 
@@ -30,11 +30,11 @@ defmodule Plumbapius.Plug.RaiseValidationError do
     plug_module.call(conn, opts, &handle_request_error/1, &handle_response_error/1)
   end
 
-  defp handle_request_error(%Request.ErrorDescription{} = error_message) do
-    raise %RequestError{error_message: error_message}
+  defp handle_request_error(%Request.ErrorDescription{} = description) do
+    raise %RequestError{description: description}
   end
 
-  defp handle_response_error(%Response.ErrorDescription{} = error_message) do
-    raise %ResponseError{error_message: error_message}
+  defp handle_response_error(%Response.ErrorDescription{} = description) do
+    raise %ResponseError{description: description}
   end
 end

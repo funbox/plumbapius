@@ -1,4 +1,6 @@
 defmodule Plumbapius.Request.ErrorDescription do
+  alias Plumbapius.ErrorFormat
+
   defstruct [:method, :path, :body, :error]
 
   @type t :: %__MODULE__{
@@ -16,5 +18,12 @@ defmodule Plumbapius.Request.ErrorDescription do
       body: conn.body_params,
       error: error
     }
+  end
+
+  defimpl String.Chars do
+    def to_string(descr) do
+      "Unexpected REQUEST to #{descr.method |> String.upcase()} #{descr.path}; " <>
+        "body: `#{ErrorFormat.body(descr.body)}`; error: #{ErrorFormat.schema_error(descr.error)}"
+    end
   end
 end

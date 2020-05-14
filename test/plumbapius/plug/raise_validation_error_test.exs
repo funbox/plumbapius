@@ -14,19 +14,19 @@ defmodule Plumbapius.Plug.RaiseValidationErrorTest do
 
   test "raise RequestError when request invalid" do
     assert_raise RequestError,
-                 ~s(Plumpabius.RequestError: %Plumbapius.Request.ErrorDescription{body: %{"foo" => "bar"}, error: [{"Type mismatch. Expected Number but got String.", "#/msisdn"}], method: "get", path: "/fake/path"}),
+                 ~r/Unexpected REQUEST/,
                  fn -> RaiseValidationError.call(:request_error, nil, FakePlug) end
   end
 
   test "raise ResponseError when response invalid" do
     assert_raise ResponseError,
-                 ~s(Plumpabius.ResponseError: %Plumbapius.Response.ErrorDescription{body: ["{", "foo", ":", "bar", "}"], error: "invalid", request: %{method: "get", path: "/fake/path"}, status: 200}),
+                 ~r/Unexpected RESPONSE/,
                  fn -> RaiseValidationError.call(:response_error, nil, FakePlug) end
   end
 
   test "raise RequestError when both invalid" do
     assert_raise RequestError,
-                 ~s(Plumpabius.RequestError: %Plumbapius.Request.ErrorDescription{body: %{"foo" => "bar"}, error: [{"Type mismatch. Expected Number but got String.", "#/msisdn"}], method: "get", path: "/fake/path"}),
+                 ~r/Unexpected REQUEST/,
                  fn -> RaiseValidationError.call(:both, nil, FakePlug) end
   end
 

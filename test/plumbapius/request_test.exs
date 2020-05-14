@@ -13,8 +13,8 @@ defmodule Plumbapius.RequestTest do
     test "when the msisdn in the request is string" do
       request_body = %{"msisdn" => "123"}
 
-      assert Request.validate(request_schema(), request_body) ==
-               {:error, [{"Type mismatch. Expected Number but got String.", "#/msisdn"}]}
+      assert {:error, error} = Request.validate(request_schema(), request_body)
+      assert error =~ "#/msisdn"
     end
   end
 

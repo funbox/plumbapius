@@ -61,7 +61,7 @@ defmodule Plumbapius.PlugTest do
       conn = post_request(201, "{\"confirmation\": {\"foo\": \"bar\"}}")
 
       assert_raise Helper.ResponseHandlerRaiseError,
-                   ~s(Plumpabius.ResponseError: %Plumbapius.Response.ErrorDescription{body: "{\\"confirmation\\": {\\"foo\\": \\"bar\\"}}", error: "invalid", request: %{method: "POST", path: "/sessions"}, status: 201}),
+                   ~r/no_such_response_in_schema/,
                    fn -> send_resp(conn) end
     end
 
@@ -69,7 +69,7 @@ defmodule Plumbapius.PlugTest do
       conn = post_request(123, ~s({"confirmation": {"id": "avaFqscDQWcAs"}}))
 
       assert_raise Helper.ResponseHandlerRaiseError,
-                   ~s(Plumpabius.ResponseError: %Plumbapius.Response.ErrorDescription{body: "{\\"confirmation\\": {\\"id\\": \\"avaFqscDQWcAs\\"}}", error: "invalid", request: %{method: "POST", path: "/sessions"}, status: 123}),
+                   ~r/no_such_response_in_schema/,
                    fn -> send_resp(conn) end
     end
 

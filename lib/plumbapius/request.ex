@@ -57,12 +57,18 @@ defmodule Plumbapius.Request do
       iex> Plumbapius.Request.validate(request_schema, %{"msisdn" => 12345})
       :ok
       iex> Plumbapius.Request.validate(request_schema, %{"msisdn" => "12345"})
-      {:error, [{"Type mismatch. Expected Number but got String.", "#/msisdn"}]}
+      {:error, "#/msisdn: Type mismatch. Expected Number but got String."}
 
   """
   @spec validate(Request.Schema.t(), map()) :: :ok | {:error, list()}
   def validate(request_schema, request_body) do
-    ExJsonSchema.Validator.validate(request_schema.body, request_body)
+    case ExJsonSchema.Validator.validate(request_schema.body, request_body) do
+      :ok ->
+        :ok
+
+      {:error, errors} ->
+        {:error, Enum.map_join(errors, ", ", &format_schema_error/1)}
+    end
   end
 
   @spec match?(Request.Schema.t(), String.t(), String.t()) :: boolean()
@@ -77,5 +83,9 @@ defmodule Plumbapius.Request do
 
   def match_content_type?(schema, request_content_type) do
     schema.content_type == request_content_type
+  end
+
+  defp format_schema_error({description, json_path}) do
+    "#{json_path}: #{description}"
   end
 end
