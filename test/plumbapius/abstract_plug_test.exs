@@ -117,7 +117,7 @@ defmodule Plumbapius.PlugTest do
     end
   end
 
-  def call_plug(conn) do
+  defp call_plug(conn) do
     AbstractPlug.call(
       conn,
       Helper.options(),

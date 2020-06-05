@@ -10,12 +10,10 @@ defmodule Plumbapius.ErrorFormat do
   end
 
   defp to_s(term) when is_list(term) do
-    try do
-      IO.iodata_to_binary(term)
-    rescue
-      ArgumentError ->
-        Enum.map_join(term, ", ", &to_s/1)
-    end
+    IO.iodata_to_binary(term)
+  rescue
+    ArgumentError ->
+      Enum.map_join(term, ", ", &to_s/1)
   end
 
   defp to_s(term) do

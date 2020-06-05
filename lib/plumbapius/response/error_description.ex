@@ -1,5 +1,6 @@
 defmodule Plumbapius.Response.ErrorDescription do
-  alias alias Plumbapius.ErrorFormat
+  # credo:disable-for-this-file Credo.Check.Readability.Specs
+  alias Plumbapius.ErrorFormat
 
   defstruct [:request, :status, :body, :error]
 
