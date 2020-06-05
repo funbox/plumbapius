@@ -7,7 +7,7 @@ defmodule Plumbapius.Request.SchemaTest do
       assert Plumbapius.Request.Schema.new(tomogram_schema()) == %Plumbapius.Request.Schema{
                method: "POST",
                path: ~r/\A\/users\/[^&=\/]+\z/,
-               content_type: ~r/\Amultipart\/mixed;\ boundary=[^\s]+\z/,
+               content_type: ~r/\Aapplication\/json\z/,
                body: %ExJsonSchema.Schema.Root{
                  custom_format_validator: nil,
                  location: :root,
@@ -83,7 +83,7 @@ defmodule Plumbapius.Request.SchemaTest do
       tomogram_with_invalid_schema_version = %{
         "method" => "POST",
         "path" => "/users/{id}",
-        "content-type" => "multipart/mixed; boundary={boundary}",
+        "content-type" => "application/json",
         "request" => %{
           "$schema" => "http://json-schema.org/draft-03/schema#",
           "type" => "object",
@@ -103,7 +103,7 @@ defmodule Plumbapius.Request.SchemaTest do
     %{
       "method" => "POST",
       "path" => "/users/{id}",
-      "content-type" => "multipart/mixed; boundary={boundary}",
+      "content-type" => "application/json",
       "request" => %{
         "$schema" => "http://json-schema.org/draft-04/schema#",
         "type" => "object",
