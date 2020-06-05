@@ -28,7 +28,7 @@ defmodule Plumbapius.AbstractPlug do
 
     register_before_send = fn conn ->
       parse_resp_body(conn.resp_body)
-      |> validate_response(current_request_schema, conn.status)
+      |> validate_response(current_request_schema, conn.status, Map.get(conn, "content-type", nil))
       |> handle_validation_result(handle_response_error, conn, Response.ErrorDescription)
 
       conn
@@ -84,15 +84,16 @@ defmodule Plumbapius.AbstractPlug do
   defp parse_resp_body(""), do: {:ok, %{}}
   defp parse_resp_body(body), do: Jason.decode(body)
 
-  defp validate_response({:ok, resp_body}, request_schema, status) do
+  defp validate_response({:ok, resp_body}, request_schema, status, content_type) do
     Response.validate_response(
       request_schema,
       status,
+      content_type,
       resp_body
     )
   end
 
-  defp validate_response(error, _request_schema, _status), do: error
+  defp validate_response(error, _request_schema, _status, _content_type), do: error
 
   defp handle_validation_result(:ok, _error_handler, _conn, _validation_module), do: :ok
 
