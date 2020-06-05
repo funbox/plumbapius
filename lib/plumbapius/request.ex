@@ -82,7 +82,7 @@ defmodule Plumbapius.Request do
   def match_content_type?(_schema, nil = _request_content_type), do: true
 
   def match_content_type?(schema, request_content_type) do
-    schema.content_type == request_content_type
+    String.match?(request_content_type, schema.content_type)
   end
 
   defp format_schema_error({description, json_path}) do

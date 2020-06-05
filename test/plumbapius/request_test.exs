@@ -38,7 +38,7 @@ defmodule Plumbapius.RequestTest do
     end
 
     test "matches content type" do
-      assert Request.match_content_type?(request_schema(), "application/json")
+      assert Request.match_content_type?(request_schema(), "multipart/mixed; boundary=\"--string\"")
       refute Request.match_content_type?(request_schema(), "doge/dummy")
     end
   end
@@ -47,7 +47,7 @@ defmodule Plumbapius.RequestTest do
     Request.Schema.new(%{
       "method" => "GET",
       "path" => "/users/{id}",
-      "content-type" => "application/json",
+      "content-type" => "multipart/mixed; boundary={boundary}",
       "request" => %{
         "$schema" => "http://json-schema.org/draft-04/schema#",
         "type" => "object",
