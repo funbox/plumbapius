@@ -1,10 +1,12 @@
 defmodule Plumbapius.ErrorFormat do
-  @spec body(any) :: String.t()
+  @moduledoc false
+
+  @spec body(any) :: binary
   def body(body) do
     to_s(body)
   end
 
-  @spec schema_error(any) :: String.t()
+  @spec schema_error(any) :: binary
   def schema_error(error) do
     to_s(error)
   end
