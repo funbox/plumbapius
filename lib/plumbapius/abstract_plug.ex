@@ -1,7 +1,6 @@
 defmodule Plumbapius.AbstractPlug do
-  alias Plumbapius.{ContentType, Request, Response}
+  alias Plumbapius.{ContentType, Request, Response, ConnHelper}
   alias Plumbapius.Plug.Options
-  alias Plug.Conn
 
   @spec init(json_schema: String.t()) :: Options.t()
   def init(options) do
@@ -27,7 +26,7 @@ defmodule Plumbapius.AbstractPlug do
 
     register_before_send = fn conn ->
       parse_resp_body(conn.resp_body)
-      |> validate_response(current_request_schema, conn.status, get_req_header(conn, "content-type"))
+      |> validate_response(current_request_schema, conn.status, ConnHelper.get_resp_header(conn, "content-type"))
       |> handle_validation_result(handle_response_error, conn, Response.ErrorDescription)
 
       conn
@@ -62,7 +61,7 @@ defmodule Plumbapius.AbstractPlug do
 
   defp content_type_for(conn) do
     if has_body?(conn) do
-      content_type = get_req_header(conn, "content-type")
+      content_type = ConnHelper.get_req_header(conn, "content-type")
 
       unless content_type do
         raise %Request.NoContentTypeError{method: conn.method, path: conn.request_path}
@@ -77,8 +76,6 @@ defmodule Plumbapius.AbstractPlug do
   defp has_body?(conn) do
     conn.method in ["POST", "PUT", "PATCH"]
   end
-
-  defp get_req_header(conn, name), do: conn |> Conn.get_req_header(name) |> Enum.at(0)
 
   defp parse_resp_body(""), do: {:ok, %{}}
   defp parse_resp_body(body), do: Jason.decode(body)
