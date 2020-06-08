@@ -1,4 +1,4 @@
-defmodule Plumbapius.PlugTest do
+defmodule Plumbapius.AbstractPlugTest do
   use ExUnit.Case
   use Plug.Test
 
