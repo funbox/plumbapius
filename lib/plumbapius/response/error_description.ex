@@ -26,8 +26,6 @@ defmodule Plumbapius.Response.ErrorDescription do
     }
   end
 
-  require Logger
-
   defimpl String.Chars do
     def to_string(descr) do
       [

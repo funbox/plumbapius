@@ -4,7 +4,7 @@ defmodule Plumbapius.RequestTest do
   alias Plumbapius.Request
 
   describe "#validate_body" do
-    test "when the request according to the scheme" do
+    test "when the request according to the schema" do
       request_body = %{"msisdn" => 123}
 
       assert Request.validate_body(request_schema(), request_body) == :ok

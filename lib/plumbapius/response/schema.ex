@@ -14,11 +14,11 @@ defmodule Plumbapius.Response.Schema do
         }
 
   @doc """
-  Returns a response scheme created from a tomogram.
+  Returns a response schema created from a tomogram.
 
   ## Parameters
 
-    - tomogram: Description of the response scheme as a hash.
+    - tomogram: Description of the response schema as a hash.
 
   ## Examples
 
@@ -53,7 +53,7 @@ defmodule Plumbapius.Response.Schema do
   def new(tomogram) when is_map(tomogram) do
     %__MODULE__{
       status: Map.fetch!(tomogram, "status") |> String.to_integer(),
-      content_type: Map.fetch!(tomogram, "content-type") |> ContentType.convert_for_scheme(),
+      content_type: Map.fetch!(tomogram, "content-type") |> ContentType.convert_for_schema(),
       body: Map.fetch!(tomogram, "body") |> ExJsonSchema.Schema.resolve()
     }
   end

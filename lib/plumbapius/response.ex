@@ -1,10 +1,10 @@
 defmodule Plumbapius.Response do
-  @moduledoc "Defines methods for validating responses by request scheme"
+  @moduledoc "Defines methods for validating responses by request schema"
 
   alias Plumbapius.{ContentType, Request}
 
   @doc """
-  Validates the response body according to the scheme.
+  Validates the response body according to the schema.
 
   ## Parameters
 

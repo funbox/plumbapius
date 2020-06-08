@@ -1,5 +1,5 @@
 defmodule Plumbapius.Request do
-  @moduledoc "Defines methods for validating requests by scheme"
+  @moduledoc "Defines methods for validating requests by schema"
 
   defmodule NotFoundError do
     defexception [:method, :path]
@@ -33,7 +33,7 @@ defmodule Plumbapius.Request do
   alias Plumbapius.Request
 
   @doc """
-  Validates request body according to a scheme.
+  Validates request body according to a schema.
 
   ## Parameters
 

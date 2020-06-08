@@ -18,11 +18,11 @@ defmodule Plumbapius.Request.Schema do
         }
 
   @doc """
-  Returns a request scheme created from a tomogram.
+  Returns a request schema created from a tomogram.
 
   ## Parameters
 
-    - tomogram: Description of the request scheme as a hash.
+    - tomogram: Description of the request schema as a hash.
 
   ## Examples
 
@@ -62,7 +62,7 @@ defmodule Plumbapius.Request.Schema do
     %__MODULE__{
       method: Map.fetch!(tomogram, "method"),
       path: Map.fetch!(tomogram, "path") |> Path.to_regex(),
-      content_type: Map.fetch!(tomogram, "content-type") |> ContentType.convert_for_scheme(),
+      content_type: Map.fetch!(tomogram, "content-type") |> ContentType.convert_for_schema(),
       body: Map.fetch!(tomogram, "request") |> ExJsonSchema.Schema.resolve(),
       responses: Map.fetch!(tomogram, "responses") |> Enum.map(&ResponseSchema.new/1)
     }

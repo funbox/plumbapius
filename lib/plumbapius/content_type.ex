@@ -10,21 +10,21 @@ defmodule Plumbapius.ContentType do
     - request_content_type_schema: Request content-type for conversion.
 
   ## Examples
-      iex> Plumbapius.ContentType.convert_for_scheme(nil)
+      iex> Plumbapius.ContentType.convert_for_schema(nil)
       :any_content_type
 
-      iex> Plumbapius.ContentType.convert_for_scheme("application/json")
+      iex> Plumbapius.ContentType.convert_for_schema("application/json")
       "application/json"
 
-      iex> Plumbapius.ContentType.convert_for_scheme("multipart/mixed; boundary={boundary}")
+      iex> Plumbapius.ContentType.convert_for_schema("multipart/mixed; boundary={boundary}")
       ~r/\\Amultipart\\/mixed; boundary=[^\\s]+\\z/
 
   """
 
-  @spec convert_for_scheme(String.t() | nil) :: Regex.t() | String.t() | :any_content_type
-  def convert_for_scheme(nil), do: :any_content_type
+  @spec convert_for_schema(String.t() | nil) :: Regex.t() | String.t() | :any_content_type
+  def convert_for_schema(nil), do: :any_content_type
 
-  def convert_for_scheme(content_type_schema) do
+  def convert_for_schema(content_type_schema) do
     variable_param_schema = ~r/\={\w+\}/
     variable_param_regex = "=[^\\s]+"
 

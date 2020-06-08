@@ -3,29 +3,29 @@ defmodule Plumbapius.ContentTypeTest do
   doctest Plumbapius.ContentType
   alias Plumbapius.ContentType
 
-  describe "#convert_for_scheme" do
+  describe "#convert_for_schema" do
     test "when the content-type is null" do
       content_type = "null"
-      assert ContentType.convert_for_scheme(content_type) == "null"
+      assert ContentType.convert_for_schema(content_type) == "null"
     end
 
     test "when the content-type has many variables replaces only parameter variable" do
       content_type = "{type}; {parameter}={value}"
-      assert ContentType.convert_for_scheme(content_type) == ~r/\A{type}; {parameter}=[^\s]+\z/
+      assert ContentType.convert_for_schema(content_type) == ~r/\A{type}; {parameter}=[^\s]+\z/
     end
 
     test "matches when the content-type is null" do
-      content_type = ContentType.convert_for_scheme("null")
+      content_type = ContentType.convert_for_schema("null")
       assert_match("null", content_type)
     end
 
     test "matches when the content-type parameter has a fixed value" do
-      content_type = ContentType.convert_for_scheme("multipart/mixed; boundary=boundary")
+      content_type = ContentType.convert_for_schema("multipart/mixed; boundary=boundary")
       assert_match("multipart/mixed; boundary=boundary", content_type)
     end
 
     test "matches when the content-type parameter has a variable" do
-      content_type = ContentType.convert_for_scheme("multipart/mixed; boundary={boundary}")
+      content_type = ContentType.convert_for_schema("multipart/mixed; boundary={boundary}")
       assert_match("multipart/mixed; boundary=\"----string\"", content_type)
     end
   end
@@ -55,8 +55,8 @@ defmodule Plumbapius.ContentTypeTest do
     end
   end
 
-  defp assert_match(content_type, scheme_content_type) do
-    assert ContentType.match?(content_type, scheme_content_type),
-           inspect(content_type: content_type, scheme_content_type: scheme_content_type)
+  defp assert_match(content_type, schema_content_type) do
+    assert ContentType.match?(content_type, schema_content_type),
+           inspect(content_type: content_type, schema_content_type: schema_content_type)
   end
 end
