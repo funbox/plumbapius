@@ -1,4 +1,4 @@
-defmodule Plumbapius.Request.Schema.ContentType do
+defmodule Plumbapius.ContentType do
   # исправить доку
   @moduledoc "Defines functions for the request content-type"
 
@@ -11,10 +11,10 @@ defmodule Plumbapius.Request.Schema.ContentType do
 
   ## Examples
 
-      iex> Plumbapius.Request.Schema.ContentType.to_regex("application/json")
+      iex> Plumbapius.ContentType.to_regex("application/json")
       ~r/\\Aapplication\\/json\\z/
 
-      iex> Plumbapius.Request.Schema.ContentType.to_regex("multipart/mixed; boundary={boundary}")
+      iex> Plumbapius.ContentType.to_regex("multipart/mixed; boundary={boundary}")
       ~r/\\Amultipart\\/mixed;\\ boundary=[^\\s]+\\z/
 
   """
@@ -38,8 +38,12 @@ defmodule Plumbapius.Request.Schema.ContentType do
     ~r/\A#{path_with_regex}\z/
   end
 
-  @spec match?(String.t() | nil, Regex.t()) :: boolean()
+  @spec match?(String.t() | nil, Regex.t() | String.t()) :: boolean()
   def match?(nil = _content_type, _schema_content_type), do: true
+
+  def match?(content_type, schema_content_type) when is_binary(schema_content_type) do
+    content_type == schema_content_type
+  end
 
   def match?(content_type, schema_content_type) do
     String.match?(content_type, schema_content_type)

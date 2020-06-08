@@ -1,9 +1,9 @@
-defmodule Plumbapius.Request.Schema.ContentTypeTest do
+defmodule Plumbapius.ContentTypeTest do
   use ExUnit.Case, async: true
-  doctest Plumbapius.Request.Schema.ContentType
-  alias Plumbapius.Request.Schema.ContentType
+  doctest Plumbapius.ContentType
+  alias Plumbapius.ContentType
 
-  describe "Plumbapius.Request.Schema.ContentType.to_regex/1" do
+  describe "#to_regex/1" do
     test "when the content-type is null" do
       content_type = "null"
       assert ContentType.to_regex(content_type) == ~r/\Anull\z/

@@ -1,7 +1,8 @@
 defmodule Plumbapius.Request.Schema do
   @moduledoc "Describes the request schema for validation"
 
-  alias Plumbapius.Request.Schema.{ContentType, Path}
+  alias Plumbapius.ContentType
+  alias Plumbapius.Request.Schema.Path
   alias Plumbapius.Response.Schema, as: ResponseSchema
 
   @enforce_keys [:method, :path]

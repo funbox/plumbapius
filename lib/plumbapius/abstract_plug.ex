@@ -1,6 +1,5 @@
 defmodule Plumbapius.AbstractPlug do
-  alias Plumbapius.{Request, Response}
-  alias Plumbapius.Request.Schema.ContentType
+  alias Plumbapius.{ContentType, Request, Response}
   alias Plumbapius.Plug.Options
   alias Plug.Conn
 

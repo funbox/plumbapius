@@ -1,7 +1,7 @@
 defmodule Plumbapius.Response do
   @moduledoc "Defines methods for validating responses by request scheme"
 
-  alias Plumbapius.Request
+  alias Plumbapius.{ContentType, Request}
 
   @doc """
   Validates the response body according to the scheme.
@@ -68,13 +68,7 @@ defmodule Plumbapius.Response do
 
   defp match?(response_schema, response_status, response_content_type) do
     response_schema.status == response_status &&
-      match_content_type?(response_schema.content_type, response_content_type)
-  end
-
-  defp match_content_type?(_schema_content_type, nil = _response_content_type), do: true
-
-  defp match_content_type?(schema_content_type, response_content_type) do
-    schema_content_type == response_content_type
+      ContentType.match?(response_content_type, response_schema.content_type)
   end
 
   defp validate_response_body([response_schema | rest], response_body) do
