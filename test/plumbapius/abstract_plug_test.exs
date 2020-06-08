@@ -85,6 +85,20 @@ defmodule Plumbapius.AbstractPlugTest do
       assert_raise Helper.ResponseHandlerRaiseError, fn -> send_resp(conn) end
     end
 
+    test "raises error when response content-type header does not match specified in schema" do
+      conn =
+        post_request(201, ~s({"confirmation": {"id": "avaFqscDQWcAs"}}))
+        |> put_resp_header("content-type", "text/plant")
+
+      assert_raise Helper.ResponseHandlerRaiseError, fn -> send_resp(conn) end
+    end
+
+    test "raises error when response content-type header is missing" do
+      conn = post_request(201, ~s({"confirmation": {"id": "avaFqscDQWcAs"}}))
+
+      assert_raise Helper.ResponseHandlerRaiseError, fn -> send_resp(conn) end
+    end
+
     test "returns without exceptions for empty response body" do
       conn =
         post_request(200, "")

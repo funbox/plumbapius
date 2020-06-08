@@ -4,24 +4,9 @@ defmodule Plumbapius.ContentTypeTest do
   alias Plumbapius.ContentType
 
   describe "#convert_for_scheme" do
-    test "when the content-type is empty" do
-      content_type = nil
-      assert ContentType.convert_for_scheme(content_type) == :any_content_type
-    end
-
     test "when the content-type is null" do
       content_type = "null"
       assert ContentType.convert_for_scheme(content_type) == "null"
-    end
-
-    test "when the content-type parameter has a fixed value" do
-      content_type = "multipart/mixed; boundary=boundary"
-      assert ContentType.convert_for_scheme(content_type) == "multipart/mixed; boundary=boundary"
-    end
-
-    test "when the content-type parameter has a variable" do
-      content_type = "multipart/mixed; boundary={boundary}"
-      assert ContentType.convert_for_scheme(content_type) == ~r/\Amultipart\/mixed; boundary=[^\s]+\z/
     end
 
     test "when the content-type has many variables replaces only parameter variable" do
@@ -41,38 +26,37 @@ defmodule Plumbapius.ContentTypeTest do
 
     test "matches when the content-type parameter has a variable" do
       content_type = ContentType.convert_for_scheme("multipart/mixed; boundary={boundary}")
-      incorrect_content_type = "multipart/mixed; boundary=plug_conn test"
-
-      request_content_types = [
-        "multipart/mixed; boundary=plug_conn_test",
-        "multipart/mixed; boundary=\"string\"",
-        "multipart/mixed; boundary=\"----string\""
-      ]
-
-      refute ContentType.match?(incorrect_content_type, content_type)
-      assert_match(request_content_types, content_type)
+      assert_match("multipart/mixed; boundary=\"----string\"", content_type)
     end
   end
 
   describe "#match?" do
-    test "always matches missing content type" do
+    test "any_content_type always matches" do
       assert ContentType.match?(nil, :any_content_type)
     end
 
-    test "matches content type" do
+    test "never matches missing content type" do
+      refute ContentType.match?(nil, nil)
+    end
+
+    test "matches when content type is fixed" do
+      assert ContentType.match?("application/json", "application/json")
+      refute ContentType.match?("doge/dummy", "application/json")
+
       assert ContentType.match?("application/json", ~r/\Aapplication\/json\z/)
       refute ContentType.match?("doge/dummy", ~r/\Aapplication\/json\z/)
     end
-  end
 
-  defp assert_match(content_types, regex_content_type) when is_list(content_types) do
-    for content_type <- content_types do
-      assert_match(content_type, regex_content_type)
+    test "matches when content type has a variable" do
+      regex = ~r/\Amultipart\/mixed; boundary=[^\s]+\z/
+
+      assert ContentType.match?("multipart/mixed; boundary=plug_conn_test", regex)
+      refute ContentType.match?("multipart/mixed; boundary=plug_conn test", regex)
     end
   end
 
-  defp assert_match(content_type, regex_content_type) do
-    assert ContentType.match?(content_type, regex_content_type),
-           inspect(content_type: content_type, regex_content_type: regex_content_type)
+  defp assert_match(content_type, scheme_content_type) do
+    assert ContentType.match?(content_type, scheme_content_type),
+           inspect(content_type: content_type, scheme_content_type: scheme_content_type)
   end
 end
