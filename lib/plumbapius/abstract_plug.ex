@@ -1,6 +1,6 @@
 defmodule Plumbapius.AbstractPlug do
-  alias Plumbapius.Request
-  alias Plumbapius.Response
+  alias Plumbapius.{Request, Response}
+  alias Plumbapius.Request.Schema.ContentType
   alias Plumbapius.Plug.Options
   alias Plug.Conn
 
@@ -48,7 +48,7 @@ defmodule Plumbapius.AbstractPlug do
     end
 
     content_type = content_type_for(conn)
-    request_schema = Enum.find(schema_candidates, &Request.match_content_type?(&1, content_type))
+    request_schema = Enum.find(schema_candidates, &ContentType.match?(content_type, &1.content_type))
 
     unless request_schema do
       raise %Request.UnknownContentTypeError{

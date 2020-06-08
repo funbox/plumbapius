@@ -78,13 +78,6 @@ defmodule Plumbapius.Request do
     String.match?(request_path, schema.path) && schema.method == request_method
   end
 
-  @spec match_content_type?(Request.Schema.t(), String.t() | nil) :: boolean()
-  def match_content_type?(_schema, nil = _request_content_type), do: true
-
-  def match_content_type?(schema, request_content_type) do
-    String.match?(request_content_type, schema.content_type)
-  end
-
   defp format_schema_error({description, json_path}) do
     "#{json_path}: #{description}"
   end

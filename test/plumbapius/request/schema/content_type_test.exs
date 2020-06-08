@@ -44,8 +44,19 @@ defmodule Plumbapius.Request.Schema.ContentTypeTest do
         "multipart/mixed; boundary=\"----string\""
       ]
 
-      refute String.match?(incorrect_content_type, content_type)
+      refute ContentType.match?(incorrect_content_type, content_type)
       assert_match(request_content_types, content_type)
+    end
+  end
+
+  describe "#match?/2" do
+    test "always matches missing content type" do
+      assert ContentType.match?(nil, ~r/\Aapplication\/json\z/)
+    end
+
+    test "matches content type" do
+      assert ContentType.match?("application/json", ~r/\Aapplication\/json\z/)
+      refute ContentType.match?("doge/dummy", ~r/\Aapplication\/json\z/)
     end
   end
 
@@ -56,7 +67,7 @@ defmodule Plumbapius.Request.Schema.ContentTypeTest do
   end
 
   defp assert_match(content_type, regex_content_type) do
-    assert String.match?(content_type, regex_content_type),
+    assert ContentType.match?(content_type, regex_content_type),
            inspect(content_type: content_type, regex_content_type: regex_content_type)
   end
 end

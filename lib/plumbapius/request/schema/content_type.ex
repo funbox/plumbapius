@@ -37,4 +37,11 @@ defmodule Plumbapius.Request.Schema.ContentType do
 
     ~r/\A#{path_with_regex}\z/
   end
+
+  @spec match?(String.t() | nil, Regex.t()) :: boolean()
+  def match?(nil = _content_type, _schema_content_type), do: true
+
+  def match?(content_type, schema_content_type) do
+    String.match?(content_type, schema_content_type)
+  end
 end

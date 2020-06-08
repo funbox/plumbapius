@@ -32,17 +32,6 @@ defmodule Plumbapius.RequestTest do
     end
   end
 
-  describe "Plumbapius.Request.match_content_type?/2" do
-    test "always matches missing content type" do
-      assert Request.match_content_type?(request_schema(), nil)
-    end
-
-    test "matches content type" do
-      assert Request.match_content_type?(request_schema(), "application/json")
-      refute Request.match_content_type?(request_schema(), "doge/dummy")
-    end
-  end
-
   defp request_schema do
     Request.Schema.new(%{
       "method" => "GET",
