@@ -1,4 +1,4 @@
-defmodule Plumbapius.PlugTest do
+defmodule Plumbapius.AbstractPlugTest do
   use ExUnit.Case
   use Plug.Test
 
@@ -58,7 +58,9 @@ defmodule Plumbapius.PlugTest do
     end
 
     test "raises error when response has incorrect body params" do
-      conn = post_request(201, "{\"confirmation\": {\"foo\": \"bar\"}}")
+      conn =
+        post_request(201, "{\"confirmation\": {\"foo\": \"bar\"}}")
+        |> put_resp_header("content-type", "application/json")
 
       assert_raise Helper.ResponseHandlerRaiseError,
                    ~r/no_such_response_in_schema/,
@@ -66,7 +68,9 @@ defmodule Plumbapius.PlugTest do
     end
 
     test "raises error when response returns incorrect status" do
-      conn = post_request(123, ~s({"confirmation": {"id": "avaFqscDQWcAs"}}))
+      conn =
+        post_request(123, ~s({"confirmation": {"id": "avaFqscDQWcAs"}}))
+        |> put_resp_header("content-type", "application/json")
 
       assert_raise Helper.ResponseHandlerRaiseError,
                    ~r/no_such_response_in_schema/,
@@ -74,17 +78,40 @@ defmodule Plumbapius.PlugTest do
     end
 
     test "raises error when response returns incorrect json" do
-      conn = post_request(123, "qwe")
+      conn =
+        post_request(123, "qwe")
+        |> put_resp_header("content-type", "application/json")
+
+      assert_raise Helper.ResponseHandlerRaiseError, fn -> send_resp(conn) end
+    end
+
+    test "raises error when response content-type header does not match specified in schema" do
+      conn =
+        post_request(201, ~s({"confirmation": {"id": "avaFqscDQWcAs"}}))
+        |> put_resp_header("content-type", "text/plane")
+
+      assert_raise Helper.ResponseHandlerRaiseError, fn -> send_resp(conn) end
+    end
+
+    test "raises error when response content-type header is missing" do
+      conn = post_request(201, ~s({"confirmation": {"id": "avaFqscDQWcAs"}}))
+
       assert_raise Helper.ResponseHandlerRaiseError, fn -> send_resp(conn) end
     end
 
     test "returns without exceptions for empty response body" do
-      conn = post_request(200, "")
+      conn =
+        post_request(200, "")
+        |> put_resp_header("content-type", "application/json")
+
       send_resp(conn)
     end
 
     test "returns without exceptions for post requests" do
-      conn = post_request(201, "{\"confirmation\": {\"id\": \"afqWDXAcaWacW\"}}")
+      conn =
+        post_request(201, "{\"confirmation\": {\"id\": \"afqWDXAcaWacW\"}}")
+        |> put_resp_header("content-type", "application/json")
+
       send_resp(conn)
     end
 
@@ -93,6 +120,7 @@ defmodule Plumbapius.PlugTest do
         conn(:get, "/users")
         |> call_plug()
         |> resp(200, "{}")
+        |> put_resp_header("content-type", "application/json")
 
       send_resp(conn)
     end
@@ -117,7 +145,7 @@ defmodule Plumbapius.PlugTest do
     end
   end
 
-  def call_plug(conn) do
+  defp call_plug(conn) do
     AbstractPlug.call(
       conn,
       Helper.options(),

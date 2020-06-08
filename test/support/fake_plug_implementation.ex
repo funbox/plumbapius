@@ -83,7 +83,7 @@ defmodule FakePlugImplementation do
       %Plumbapius.Request.Schema{
         method: "GET",
         path: ~r/\A\/users\z/,
-        content_type: nil,
+        content_type: :any_content_type,
         body: %ExJsonSchema.Schema.Root{
           custom_format_validator: nil,
           location: :root,

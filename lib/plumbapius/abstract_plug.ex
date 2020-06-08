@@ -1,8 +1,6 @@
 defmodule Plumbapius.AbstractPlug do
-  alias Plumbapius.Request
-  alias Plumbapius.Response
+  alias Plumbapius.{ContentType, Request, Response, ConnHelper}
   alias Plumbapius.Plug.Options
-  alias Plug.Conn
 
   @spec init(json_schema: String.t()) :: Options.t()
   def init(options) do
@@ -23,12 +21,12 @@ defmodule Plumbapius.AbstractPlug do
   def call(conn, options, handle_request_error, handle_response_error) do
     current_request_schema = find_request_schema(options.schema, conn)
 
-    Request.validate(current_request_schema, conn.body_params)
+    Request.validate_body(current_request_schema, conn.body_params)
     |> handle_validation_result(handle_request_error, conn, Request.ErrorDescription)
 
     register_before_send = fn conn ->
       parse_resp_body(conn.resp_body)
-      |> validate_response(current_request_schema, conn.status)
+      |> validate_response(current_request_schema, conn.status, ConnHelper.get_resp_header(conn, "content-type"))
       |> handle_validation_result(handle_response_error, conn, Response.ErrorDescription)
 
       conn
@@ -48,7 +46,7 @@ defmodule Plumbapius.AbstractPlug do
     end
 
     content_type = content_type_for(conn)
-    request_schema = Enum.find(schema_candidates, &Request.match_content_type?(&1, content_type))
+    request_schema = Enum.find(schema_candidates, &ContentType.match?(content_type, &1.content_type))
 
     unless request_schema do
       raise %Request.UnknownContentTypeError{
@@ -63,7 +61,7 @@ defmodule Plumbapius.AbstractPlug do
 
   defp content_type_for(conn) do
     if has_body?(conn) do
-      content_type = get_req_header(conn, "content-type")
+      content_type = ConnHelper.get_req_header(conn, "content-type")
 
       unless content_type do
         raise %Request.NoContentTypeError{method: conn.method, path: conn.request_path}
@@ -79,20 +77,19 @@ defmodule Plumbapius.AbstractPlug do
     conn.method in ["POST", "PUT", "PATCH"]
   end
 
-  defp get_req_header(conn, name), do: conn |> Conn.get_req_header(name) |> Enum.at(0)
-
   defp parse_resp_body(""), do: {:ok, %{}}
   defp parse_resp_body(body), do: Jason.decode(body)
 
-  defp validate_response({:ok, resp_body}, request_schema, status) do
+  defp validate_response({:ok, resp_body}, request_schema, status, content_type) do
     Response.validate_response(
       request_schema,
       status,
+      content_type,
       resp_body
     )
   end
 
-  defp validate_response(error, _request_schema, _status), do: error
+  defp validate_response(error, _request_schema, _status, _content_type), do: error
 
   defp handle_validation_result(:ok, _error_handler, _conn, _validation_module), do: :ok
 

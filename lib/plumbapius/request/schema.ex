@@ -1,6 +1,10 @@
 defmodule Plumbapius.Request.Schema do
   @moduledoc "Describes the request schema for validation"
 
+  alias Plumbapius.ContentType
+  alias Plumbapius.Request.Schema.Path
+  alias Plumbapius.Response.Schema, as: ResponseSchema
+
   @enforce_keys [:method, :path]
   defstruct [:method, :path, :content_type, :body, responses: []]
 
@@ -8,24 +12,24 @@ defmodule Plumbapius.Request.Schema do
   @type t :: %__MODULE__{
           method: String.t(),
           path: Regex.t(),
-          content_type: String.t(),
+          content_type: Regex.t() | String.t() | :any_content_type,
           body: ExJsonSchema.Schema.Root.t(),
-          responses: [Plumbapius.Response.Schema.t()]
+          responses: [ResponseSchema.t()]
         }
 
   @doc """
-  Returns a request scheme created from a tomogram.
+  Returns a request schema created from a tomogram.
 
   ## Parameters
 
-    - tomogram: Description of the request scheme as a hash.
+    - tomogram: Description of the request schema as a hash.
 
   ## Examples
 
       iex> Plumbapius.Request.Schema.new(%{
       ...>   "method"=>"GET",
       ...>   "path"=>"/users/{id}",
-      ...>   "content-type"=>"application/json",
+      ...>   "content-type"=>"multipart/mixed; boundary={boundary}",
       ...>   "request"=>%{
       ...>     "$schema" => "http://json-schema.org/draft-04/schema#",
       ...>     "type" => "object",
@@ -37,7 +41,7 @@ defmodule Plumbapius.Request.Schema do
       %Plumbapius.Request.Schema{
         method: "GET",
         path: ~r/\\A\\/users\\/[^&=\\/]+\\z/,
-        content_type: "application/json",
+        content_type: ~r/\\Amultipart\\/mixed; boundary=[^\\s]+\\z/,
         body: %ExJsonSchema.Schema.Root{
           custom_format_validator: nil,
           location: :root,
@@ -57,10 +61,10 @@ defmodule Plumbapius.Request.Schema do
   def new(tomogram) when is_map(tomogram) do
     %__MODULE__{
       method: Map.fetch!(tomogram, "method"),
-      path: Map.fetch!(tomogram, "path") |> Plumbapius.Request.Schema.Path.to_regex(),
-      content_type: Map.fetch!(tomogram, "content-type"),
+      path: Map.fetch!(tomogram, "path") |> Path.to_regex(),
+      content_type: Map.fetch!(tomogram, "content-type") |> ContentType.convert_for_schema(),
       body: Map.fetch!(tomogram, "request") |> ExJsonSchema.Schema.resolve(),
-      responses: Map.fetch!(tomogram, "responses") |> Enum.map(&Plumbapius.Response.Schema.new/1)
+      responses: Map.fetch!(tomogram, "responses") |> Enum.map(&ResponseSchema.new/1)
     }
   end
 end

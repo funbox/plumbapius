@@ -3,22 +3,22 @@ defmodule Plumbapius.RequestTest do
   doctest Plumbapius.Request
   alias Plumbapius.Request
 
-  describe "Plumbapius.Request.validate/2" do
-    test "when the request according to the scheme" do
+  describe "#validate_body" do
+    test "when the request according to the schema" do
       request_body = %{"msisdn" => 123}
 
-      assert Request.validate(request_schema(), request_body) == :ok
+      assert Request.validate_body(request_schema(), request_body) == :ok
     end
 
     test "when the msisdn in the request is string" do
       request_body = %{"msisdn" => "123"}
 
-      assert {:error, error} = Request.validate(request_schema(), request_body)
+      assert {:error, error} = Request.validate_body(request_schema(), request_body)
       assert error =~ "#/msisdn"
     end
   end
 
-  describe "Plumbapius.Request.match?/3" do
+  describe "#match?" do
     test "when schema matches with the request" do
       assert Request.match?(request_schema(), "GET", "/users/1")
     end
@@ -29,17 +29,6 @@ defmodule Plumbapius.RequestTest do
 
     test "when request has a different path" do
       refute Request.match?(request_schema(), "POST", "/users/1")
-    end
-  end
-
-  describe "Plumbapius.Request.match_content_type?/2" do
-    test "always matches missing content type" do
-      assert Request.match_content_type?(request_schema(), nil)
-    end
-
-    test "matches content type" do
-      assert Request.match_content_type?(request_schema(), "application/json")
-      refute Request.match_content_type?(request_schema(), "doge/dummy")
     end
   end
 

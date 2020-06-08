@@ -1,10 +1,10 @@
 defmodule Plumbapius.Response do
-  @moduledoc "Defines methods for validating responses by request scheme"
+  @moduledoc "Defines methods for validating responses by request schema"
 
-  alias Plumbapius.Request
+  alias Plumbapius.{ContentType, Request}
 
   @doc """
-  Validates the response body according to the scheme.
+  Validates the response body according to the schema.
 
   ## Parameters
 
@@ -39,37 +39,49 @@ defmodule Plumbapius.Response do
       ...>     }
       ...>   ]
       ...> })
-      iex> Plumbapius.Response.validate_response(request_schema, 200, %{"field_name" => "foobar"})
+      iex> Plumbapius.Response.validate_response(request_schema, 200, "application/json", %{"field_name" => "foobar"})
       :ok
-      iex> Plumbapius.Response.validate_response(request_schema, 200, %{"another_field_name" => "12345"})
+      iex> Plumbapius.Response.validate_response(request_schema, 200, "application/json", %{"another_field_name" => "12345"})
       {:error, "no_such_response_in_schema"}
-      iex> Plumbapius.Response.validate_response(request_schema, 401, %{"field_name" => "foobar"})
+      iex> Plumbapius.Response.validate_response(request_schema, 200, "text/plain", %{"field_name" => "foobar"})
+      {:error, "no_such_response_in_schema"}
+      iex> Plumbapius.Response.validate_response(request_schema, 401, "application/json", %{"field_name" => "foobar"})
       {:error, "no_such_response_in_schema"}
 
   """
-  @spec validate_response(Request.Schema.t(), non_neg_integer, map) :: :ok | {:error, String.t()}
-  def validate_response(request_schema, response_status, response_body) do
-    response_status
-    |> find_tomogram(request_schema.responses)
-    |> validate(response_body)
+  @spec validate_response(
+          request_schema :: Request.Schema.t(),
+          response_status :: non_neg_integer,
+          response_content_type :: String.t(),
+          body :: map
+        ) :: :ok | {:error, String.t()}
+  def validate_response(request_schema, response_status, response_content_type, response_body) do
+    request_schema.responses
+    |> find_tomogram(response_status, response_content_type)
+    |> validate_body(response_body)
   end
 
-  defp find_tomogram(response_status, responses) do
+  defp find_tomogram(responses, response_status, response_content_type) do
     responses
-    |> Enum.filter(&(&1.status == response_status))
+    |> Enum.filter(&match?(&1, response_status, response_content_type))
   end
 
-  defp validate([response_schema | rest], response_body) do
+  defp match?(response_schema, response_status, response_content_type) do
+    response_schema.status == response_status &&
+      ContentType.match?(response_content_type, response_schema.content_type)
+  end
+
+  defp validate_body([response_schema | rest], response_body) do
     case ExJsonSchema.Validator.validate(response_schema.body, response_body) do
       :ok ->
         :ok
 
       _ ->
-        validate(rest, response_body)
+        validate_body(rest, response_body)
     end
   end
 
-  defp validate([], _response_body) do
+  defp validate_body([], _response_body) do
     {:error, "no_such_response_in_schema"}
   end
 end

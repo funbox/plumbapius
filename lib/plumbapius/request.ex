@@ -1,5 +1,5 @@
 defmodule Plumbapius.Request do
-  @moduledoc "Defines methods for validating requests by scheme"
+  @moduledoc "Defines methods for validating requests by schema"
 
   defmodule NotFoundError do
     defexception [:method, :path]
@@ -33,7 +33,7 @@ defmodule Plumbapius.Request do
   alias Plumbapius.Request
 
   @doc """
-  Validates request body according to a scheme.
+  Validates request body according to a schema.
 
   ## Parameters
 
@@ -54,14 +54,14 @@ defmodule Plumbapius.Request do
       ...>   },
       ...>   "responses"=>[]
       ...> })
-      iex> Plumbapius.Request.validate(request_schema, %{"msisdn" => 12345})
+      iex> Plumbapius.Request.validate_body(request_schema, %{"msisdn" => 12345})
       :ok
-      iex> Plumbapius.Request.validate(request_schema, %{"msisdn" => "12345"})
+      iex> Plumbapius.Request.validate_body(request_schema, %{"msisdn" => "12345"})
       {:error, "#/msisdn: Type mismatch. Expected Number but got String."}
 
   """
-  @spec validate(Request.Schema.t(), map()) :: :ok | {:error, list()}
-  def validate(request_schema, request_body) do
+  @spec validate_body(Request.Schema.t(), map()) :: :ok | {:error, list()}
+  def validate_body(request_schema, request_body) do
     case ExJsonSchema.Validator.validate(request_schema.body, request_body) do
       :ok ->
         :ok
@@ -76,13 +76,6 @@ defmodule Plumbapius.Request do
 
   def match?(schema, request_method, request_path) do
     String.match?(request_path, schema.path) && schema.method == request_method
-  end
-
-  @spec match_content_type?(Request.Schema.t(), String.t() | nil) :: boolean()
-  def match_content_type?(_schema, nil = _request_content_type), do: true
-
-  def match_content_type?(schema, request_content_type) do
-    schema.content_type == request_content_type
   end
 
   defp format_schema_error({description, json_path}) do

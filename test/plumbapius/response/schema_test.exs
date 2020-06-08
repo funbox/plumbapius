@@ -4,7 +4,7 @@ defmodule Plumbapius.Response.SchemaTest do
 
   alias Plumbapius.Response.Schema
 
-  describe "Plumbapius.Response.Schema.new/1" do
+  describe "#new" do
     test "when the tomogram is a valid response schema" do
       assert Schema.new(tomogram_schema()) == %Schema{
                status: 200,

@@ -3,7 +3,7 @@ defmodule Plumbapius.Request.Schema.PathTest do
   doctest Plumbapius.Request.Schema.Path
   alias Plumbapius.Request.Schema.Path
 
-  describe "Plumbapius.Request.Schema.Path.to_regex/1" do
+  describe "#to_regex" do
     test "when the path does not have a resource id" do
       path_without_id = "/users"
       assert Path.to_regex(path_without_id) == ~r/\A\/users\z/

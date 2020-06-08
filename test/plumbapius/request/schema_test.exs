@@ -2,12 +2,12 @@ defmodule Plumbapius.Request.SchemaTest do
   use ExUnit.Case, async: true
   doctest Plumbapius.Request.Schema
 
-  describe "Plumbapius.Request.Schema.new/1" do
+  describe "#new" do
     test "when the tomogram is a valid request schema" do
       assert Plumbapius.Request.Schema.new(tomogram_schema()) == %Plumbapius.Request.Schema{
                method: "POST",
                path: ~r/\A\/users\/[^&=\/]+\z/,
-               content_type: "multipart/form-data",
+               content_type: "application/json",
                body: %ExJsonSchema.Schema.Root{
                  custom_format_validator: nil,
                  location: :root,
@@ -83,7 +83,7 @@ defmodule Plumbapius.Request.SchemaTest do
       tomogram_with_invalid_schema_version = %{
         "method" => "POST",
         "path" => "/users/{id}",
-        "content-type" => "multipart/form-data",
+        "content-type" => "application/json",
         "request" => %{
           "$schema" => "http://json-schema.org/draft-03/schema#",
           "type" => "object",
@@ -103,7 +103,7 @@ defmodule Plumbapius.Request.SchemaTest do
     %{
       "method" => "POST",
       "path" => "/users/{id}",
-      "content-type" => "multipart/form-data",
+      "content-type" => "application/json",
       "request" => %{
         "$schema" => "http://json-schema.org/draft-04/schema#",
         "type" => "object",
