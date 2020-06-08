@@ -58,7 +58,7 @@ defmodule Plumbapius.Response do
   def validate_response(request_schema, response_status, response_content_type, response_body) do
     request_schema.responses
     |> find_tomogram(response_status, response_content_type)
-    |> validate_response_body(response_body)
+    |> validate_body(response_body)
   end
 
   defp find_tomogram(responses, response_status, response_content_type) do
@@ -71,17 +71,17 @@ defmodule Plumbapius.Response do
       ContentType.match?(response_content_type, response_schema.content_type)
   end
 
-  defp validate_response_body([response_schema | rest], response_body) do
+  defp validate_body([response_schema | rest], response_body) do
     case ExJsonSchema.Validator.validate(response_schema.body, response_body) do
       :ok ->
         :ok
 
       _ ->
-        validate_response_body(rest, response_body)
+        validate_body(rest, response_body)
     end
   end
 
-  defp validate_response_body([], _response_body) do
+  defp validate_body([], _response_body) do
     {:error, "no_such_response_in_schema"}
   end
 end

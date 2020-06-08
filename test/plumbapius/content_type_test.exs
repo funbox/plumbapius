@@ -3,7 +3,7 @@ defmodule Plumbapius.ContentTypeTest do
   doctest Plumbapius.ContentType
   alias Plumbapius.ContentType
 
-  describe "#to_regex/1" do
+  describe "#to_regex" do
     test "when the content-type is null" do
       content_type = "null"
       assert ContentType.to_regex(content_type) == ~r/\Anull\z/
@@ -49,7 +49,7 @@ defmodule Plumbapius.ContentTypeTest do
     end
   end
 
-  describe "#match?/2" do
+  describe "#match?" do
     test "always matches missing content type" do
       assert ContentType.match?(nil, ~r/\Aapplication\/json\z/)
     end

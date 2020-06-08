@@ -22,12 +22,12 @@ defmodule Plumbapius.AbstractPlug do
   def call(conn, options, handle_request_error, handle_response_error) do
     current_request_schema = find_request_schema(options.schema, conn)
 
-    Request.validate(current_request_schema, conn.body_params)
+    Request.validate_body(current_request_schema, conn.body_params)
     |> handle_validation_result(handle_request_error, conn, Request.ErrorDescription)
 
     register_before_send = fn conn ->
       parse_resp_body(conn.resp_body)
-      |> validate_response(current_request_schema, conn.status, Map.get(conn, "content-type", nil))
+      |> validate_response(current_request_schema, conn.status, get_req_header(conn, "content-type"))
       |> handle_validation_result(handle_response_error, conn, Response.ErrorDescription)
 
       conn

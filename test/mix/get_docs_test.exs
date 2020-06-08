@@ -5,7 +5,7 @@ defmodule Mix.Tasks.Plumbapius.GetDocsTest do
 
   alias Mix.Tasks.Plumbapius.GetDocs
 
-  describe "run/1" do
+  describe "#run" do
     test "runs update_repo and update_gitignore with default params" do
       GetDocs.run(["-c", "ssh://apib.git"], &update_repo/3, &update_gitignore/1)
 

@@ -5,7 +5,7 @@ defmodule Mix.Tasks.Plumbapius.SetupDocsTest do
 
   alias Mix.Tasks.Plumbapius.SetupDocs
 
-  describe "run/1" do
+  describe "#run" do
     test "runs run_crafter and run_tomograph with default param" do
       SetupDocs.run(["-f", "./.apib/api.apib"], &run_crafter/1, &run_tomograph/1)
 

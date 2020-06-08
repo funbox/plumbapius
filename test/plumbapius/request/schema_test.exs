@@ -2,7 +2,7 @@ defmodule Plumbapius.Request.SchemaTest do
   use ExUnit.Case, async: true
   doctest Plumbapius.Request.Schema
 
-  describe "Plumbapius.Request.Schema.new/1" do
+  describe "#new" do
     test "when the tomogram is a valid request schema" do
       assert Plumbapius.Request.Schema.new(tomogram_schema()) == %Plumbapius.Request.Schema{
                method: "POST",

@@ -54,14 +54,14 @@ defmodule Plumbapius.Request do
       ...>   },
       ...>   "responses"=>[]
       ...> })
-      iex> Plumbapius.Request.validate(request_schema, %{"msisdn" => 12345})
+      iex> Plumbapius.Request.validate_body(request_schema, %{"msisdn" => 12345})
       :ok
-      iex> Plumbapius.Request.validate(request_schema, %{"msisdn" => "12345"})
+      iex> Plumbapius.Request.validate_body(request_schema, %{"msisdn" => "12345"})
       {:error, "#/msisdn: Type mismatch. Expected Number but got String."}
 
   """
-  @spec validate(Request.Schema.t(), map()) :: :ok | {:error, list()}
-  def validate(request_schema, request_body) do
+  @spec validate_body(Request.Schema.t(), map()) :: :ok | {:error, list()}
+  def validate_body(request_schema, request_body) do
     case ExJsonSchema.Validator.validate(request_schema.body, request_body) do
       :ok ->
         :ok
