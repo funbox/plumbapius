@@ -5,7 +5,7 @@ defmodule Plumbapius.ErrorFormat do
   def status(status), do: to_string(status)
 
   @spec content_type(String.t() | nil) :: binary
-  def content_type(status), do: status || ""
+  def content_type(status), do: status || "empty"
 
   @spec body(any) :: binary
   def body(body) do

@@ -7,7 +7,7 @@ defmodule Plumbapius.Request.SchemaTest do
       assert Plumbapius.Request.Schema.new(tomogram_schema()) == %Plumbapius.Request.Schema{
                method: "POST",
                path: ~r/\A\/users\/[^&=\/]+\z/,
-               content_type: ~r/\Aapplication\/json\z/,
+               content_type: "application/json",
                body: %ExJsonSchema.Schema.Root{
                  custom_format_validator: nil,
                  location: :root,

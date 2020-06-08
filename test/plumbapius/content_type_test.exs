@@ -3,39 +3,44 @@ defmodule Plumbapius.ContentTypeTest do
   doctest Plumbapius.ContentType
   alias Plumbapius.ContentType
 
-  describe "#to_regex" do
+  describe "#convert_for_scheme" do
+    test "when the content-type is empty" do
+      content_type = nil
+      assert ContentType.convert_for_scheme(content_type) == :any_content_type
+    end
+
     test "when the content-type is null" do
       content_type = "null"
-      assert ContentType.to_regex(content_type) == ~r/\Anull\z/
+      assert ContentType.convert_for_scheme(content_type) == "null"
     end
 
     test "when the content-type parameter has a fixed value" do
       content_type = "multipart/mixed; boundary=boundary"
-      assert ContentType.to_regex(content_type) == ~r/\Amultipart\/mixed;\ boundary=boundary\z/
+      assert ContentType.convert_for_scheme(content_type) == "multipart/mixed; boundary=boundary"
     end
 
     test "when the content-type parameter has a variable" do
       content_type = "multipart/mixed; boundary={boundary}"
-      assert ContentType.to_regex(content_type) == ~r/\Amultipart\/mixed;\ boundary=[^\s]+\z/
+      assert ContentType.convert_for_scheme(content_type) == ~r/\Amultipart\/mixed; boundary=[^\s]+\z/
     end
 
     test "when the content-type has many variables replaces only parameter variable" do
       content_type = "{type}; {parameter}={value}"
-      assert ContentType.to_regex(content_type) == ~r/\A{type};\ {parameter}=[^\s]+\z/
+      assert ContentType.convert_for_scheme(content_type) == ~r/\A{type}; {parameter}=[^\s]+\z/
     end
 
     test "matches when the content-type is null" do
-      content_type = ContentType.to_regex("null")
+      content_type = ContentType.convert_for_scheme("null")
       assert_match("null", content_type)
     end
 
     test "matches when the content-type parameter has a fixed value" do
-      content_type = ContentType.to_regex("multipart/mixed; boundary=boundary")
+      content_type = ContentType.convert_for_scheme("multipart/mixed; boundary=boundary")
       assert_match("multipart/mixed; boundary=boundary", content_type)
     end
 
     test "matches when the content-type parameter has a variable" do
-      content_type = ContentType.to_regex("multipart/mixed; boundary={boundary}")
+      content_type = ContentType.convert_for_scheme("multipart/mixed; boundary={boundary}")
       incorrect_content_type = "multipart/mixed; boundary=plug_conn test"
 
       request_content_types = [
@@ -51,7 +56,7 @@ defmodule Plumbapius.ContentTypeTest do
 
   describe "#match?" do
     test "always matches missing content type" do
-      assert ContentType.match?(nil, ~r/\Aapplication\/json\z/)
+      assert ContentType.match?(nil, :any_content_type)
     end
 
     test "matches content type" do

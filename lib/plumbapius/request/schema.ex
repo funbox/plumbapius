@@ -12,7 +12,7 @@ defmodule Plumbapius.Request.Schema do
   @type t :: %__MODULE__{
           method: String.t(),
           path: Regex.t(),
-          content_type: Regex.t(),
+          content_type: Regex.t() | String.t() | :any_content_type,
           body: ExJsonSchema.Schema.Root.t(),
           responses: [ResponseSchema.t()]
         }
@@ -41,7 +41,7 @@ defmodule Plumbapius.Request.Schema do
       %Plumbapius.Request.Schema{
         method: "GET",
         path: ~r/\\A\\/users\\/[^&=\\/]+\\z/,
-        content_type: ~r/\\Amultipart\\/mixed;\\ boundary=[^\\s]+\\z/,
+        content_type: ~r/\\Amultipart\\/mixed; boundary=[^\\s]+\\z/,
         body: %ExJsonSchema.Schema.Root{
           custom_format_validator: nil,
           location: :root,
@@ -62,7 +62,7 @@ defmodule Plumbapius.Request.Schema do
     %__MODULE__{
       method: Map.fetch!(tomogram, "method"),
       path: Map.fetch!(tomogram, "path") |> Path.to_regex(),
-      content_type: Map.fetch!(tomogram, "content-type") |> ContentType.to_regex(),
+      content_type: Map.fetch!(tomogram, "content-type") |> ContentType.convert_for_scheme(),
       body: Map.fetch!(tomogram, "request") |> ExJsonSchema.Schema.resolve(),
       responses: Map.fetch!(tomogram, "responses") |> Enum.map(&ResponseSchema.new/1)
     }

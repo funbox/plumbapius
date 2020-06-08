@@ -10,36 +10,41 @@ defmodule Plumbapius.ContentType do
     - request_content_type_schema: Request content-type for conversion.
 
   ## Examples
+      iex> Plumbapius.ContentType.convert_for_scheme(nil)
+      :any_content_type
 
-      iex> Plumbapius.ContentType.to_regex("application/json")
-      ~r/\\Aapplication\\/json\\z/
+      iex> Plumbapius.ContentType.convert_for_scheme("application/json")
+      "application/json"
 
-      iex> Plumbapius.ContentType.to_regex("multipart/mixed; boundary={boundary}")
-      ~r/\\Amultipart\\/mixed;\\ boundary=[^\\s]+\\z/
+      iex> Plumbapius.ContentType.convert_for_scheme("multipart/mixed; boundary={boundary}")
+      ~r/\\Amultipart\\/mixed; boundary=[^\\s]+\\z/
 
   """
 
-  @spec to_regex(String.t()) :: Regex.t()
-  def to_regex(nil) do
-    ~r/\Anull\z/
-  end
+  @spec convert_for_scheme(String.t() | nil) :: Regex.t() | String.t() | :any_content_type
+  def convert_for_scheme(nil), do: :any_content_type
 
-  def to_regex(request_content_type_schema) do
+  def convert_for_scheme(content_type_schema) do
     variable_param_schema = ~r/\={\w+\}/
     variable_param_regex = "=[^\\s]+"
 
     path_with_regex =
-      request_content_type_schema
-      |> Regex.escape()
+      content_type_schema
       |> String.replace("\\\{", "{")
       |> String.replace("\\\}", "}")
       |> String.replace(variable_param_schema, variable_param_regex)
 
-    ~r/\A#{path_with_regex}\z/
+    if path_with_regex == content_type_schema do
+      content_type_schema
+    else
+      ~r/\A#{path_with_regex}\z/
+    end
   end
 
-  @spec match?(String.t() | nil, Regex.t() | String.t()) :: boolean()
-  def match?(nil = _content_type, _schema_content_type), do: true
+  @spec match?(String.t() | nil, Regex.t() | String.t() | :any_content_type) :: boolean()
+  def match?(_content_type, :any_content_type = _schema_content_type), do: true
+
+  def match?(nil = _content_type, _schema_content_type), do: false
 
   def match?(content_type, schema_content_type) when is_binary(schema_content_type) do
     content_type == schema_content_type
