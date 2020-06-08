@@ -1,6 +1,12 @@
 defmodule Plumbapius.ErrorFormat do
   @moduledoc false
 
+  @spec status(non_neg_integer) :: binary
+  def status(status), do: to_string(status)
+
+  @spec content_type(String.t() | nil) :: binary
+  def content_type(status), do: status || ""
+
   @spec body(any) :: binary
   def body(body) do
     to_s(body)

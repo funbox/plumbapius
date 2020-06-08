@@ -34,6 +34,7 @@ defmodule FakePlug do
         path: "/fake/path"
       },
       status: 200,
+      content_type: "application/json",
       body: ["{", "foo", ":", "bar", "}"],
       error: "invalid"
     }

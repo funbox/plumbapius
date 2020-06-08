@@ -23,8 +23,12 @@ defmodule Plumbapius.Request.ErrorDescription do
 
   defimpl String.Chars do
     def to_string(descr) do
-      "Unexpected REQUEST to #{descr.method |> String.upcase()} #{descr.path}; " <>
-        "body: `#{ErrorFormat.body(descr.body)}`; error: #{ErrorFormat.schema_error(descr.error)}"
+      [
+        ["Unexpected REQUEST to ", descr.method |> String.upcase(), " ", descr.path],
+        ["body: ", "`", ErrorFormat.body(descr.body), "`"],
+        ["error: ", ErrorFormat.schema_error(descr.error)]
+      ]
+      |> Enum.join("; ")
     end
   end
 end
