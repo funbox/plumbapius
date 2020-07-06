@@ -136,6 +136,23 @@ defmodule Plumbapius.AbstractPlugTest do
       assert new_conn.assigns[:modified]
     end
 
+    test "allows handle_request_error callback to send its own response" do
+      conn =
+        conn(:post, "/sessions", %{"foo" => "bar", "password" => "admin"})
+        |> put_req_header("content-type", "application/json")
+
+      new_conn =
+        call_plug(
+          conn,
+          fn _error, conn ->
+            send_resp(conn, 200, "{}")
+          end,
+          fn _error, conn -> conn end
+        )
+
+      assert new_conn.status == 200
+    end
+
     test "allows handle_response_error callback to modify conn" do
       new_conn =
         post_request(404, "{}", fn _error, conn -> conn end, fn _error, conn ->

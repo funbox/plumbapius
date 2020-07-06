@@ -34,7 +34,11 @@ defmodule Plumbapius.AbstractPlug do
       conn
     end
 
-    Plug.Conn.register_before_send(new_conn, register_before_send)
+    if new_conn.state == :sent do
+      new_conn
+    else
+      Plug.Conn.register_before_send(new_conn, register_before_send)
+    end
   end
 
   defp find_request_schema(request_schemas, conn) do
