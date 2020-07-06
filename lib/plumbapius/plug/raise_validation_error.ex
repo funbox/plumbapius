@@ -27,14 +27,14 @@ defmodule Plumbapius.Plug.RaiseValidationError do
 
   @impl Plug
   def call(conn, opts, plug_module \\ AbstractPlug) do
-    plug_module.call(conn, opts, &handle_request_error/1, &handle_response_error/1)
+    plug_module.call(conn, opts, &handle_request_error/2, &handle_response_error/2)
   end
 
-  defp handle_request_error(%Request.ErrorDescription{} = description) do
+  defp handle_request_error(%Request.ErrorDescription{} = description, _conn) do
     raise %RequestError{description: description}
   end
 
-  defp handle_response_error(%Response.ErrorDescription{} = description) do
+  defp handle_response_error(%Response.ErrorDescription{} = description, _conn) do
     raise %ResponseError{description: description}
   end
 end

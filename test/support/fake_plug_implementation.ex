@@ -108,9 +108,9 @@ defmodule FakePlugImplementation do
 
   def options, do: @options
 
-  @spec handle_request_error(map) :: none
-  def handle_request_error(error), do: raise(%RequestHandlerRaiseError{error_message: error})
+  @spec handle_request_error(map, term) :: none
+  def handle_request_error(error, _conn), do: raise(%RequestHandlerRaiseError{error_message: error})
 
-  @spec handle_response_error(map) :: none
-  def handle_response_error(error), do: raise(%ResponseHandlerRaiseError{error_message: error})
+  @spec handle_response_error(map, term) :: none
+  def handle_response_error(error, _conn), do: raise(%ResponseHandlerRaiseError{error_message: error})
 end

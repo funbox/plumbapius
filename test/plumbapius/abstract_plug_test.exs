@@ -125,11 +125,37 @@ defmodule Plumbapius.AbstractPlugTest do
       send_resp(conn)
     end
 
-    defp post_request(status, body) do
+    test "allows handle_request_error callback to modify conn" do
+      conn =
+        conn(:post, "/sessions", %{"foo" => "bar", "password" => "admin"})
+        |> put_req_header("content-type", "application/json")
+
+      new_conn =
+        call_plug(conn, fn _error, conn -> Plug.Conn.assign(conn, :modified, true) end, fn _error, conn -> conn end)
+
+      assert new_conn.assigns[:modified]
+    end
+
+    test "allows handle_response_error callback to modify conn" do
+      new_conn =
+        post_request(404, "{}", fn _error, conn -> conn end, fn _error, conn ->
+          Plug.Conn.assign(conn, :modified, true)
+        end)
+        |> send_resp()
+
+      assert new_conn.assigns[:modified]
+    end
+
+    defp post_request(
+           status,
+           resp_body,
+           request_handler \\ &Helper.handle_request_error/2,
+           response_handler \\ &Helper.handle_response_error/2
+         ) do
       conn(:post, "/sessions", %{"login" => "admin", "password" => "admin"})
       |> put_req_header("content-type", "application/json")
-      |> call_plug()
-      |> resp(status, body)
+      |> call_plug(request_handler, response_handler)
+      |> resp(status, resp_body)
     end
   end
 
@@ -145,12 +171,16 @@ defmodule Plumbapius.AbstractPlugTest do
     end
   end
 
-  defp call_plug(conn) do
+  defp call_plug(
+         conn,
+         request_handler \\ &Helper.handle_request_error/2,
+         response_handler \\ &Helper.handle_response_error/2
+       ) do
     AbstractPlug.call(
       conn,
       Helper.options(),
-      &Helper.handle_request_error/1,
-      &Helper.handle_response_error/1
+      request_handler,
+      response_handler
     )
   end
 end

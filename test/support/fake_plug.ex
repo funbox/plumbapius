@@ -7,16 +7,16 @@ defmodule FakePlug do
   def call(nil, _opts, _handle_request_error, _handle_resposne_error), do: {:ok, :called}
 
   def call(:request_error, _opts, handle_request_error, _handle_response_error) do
-    handle_request_error.(request_error())
+    handle_request_error.(request_error(), :fake_conn)
   end
 
   def call(:response_error, _opts, _handle_request_error, handle_response_error) do
-    handle_response_error.(response_error())
+    handle_response_error.(response_error(), :fake_conn)
   end
 
   def call(:both, _opts, handle_request_error, handle_response_error) do
-    handle_request_error.(request_error())
-    handle_response_error.(response_error())
+    handle_request_error.(request_error(), :fake_conn)
+    handle_response_error.(response_error(), :fake_conn)
   end
 
   defp request_error,

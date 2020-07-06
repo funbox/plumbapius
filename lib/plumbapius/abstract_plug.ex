@@ -21,18 +21,20 @@ defmodule Plumbapius.AbstractPlug do
   def call(conn, options, handle_request_error, handle_response_error) do
     current_request_schema = find_request_schema(options.schema, conn)
 
-    Request.validate_body(current_request_schema, conn.body_params)
-    |> handle_validation_result(handle_request_error, conn, Request.ErrorDescription)
+    new_conn =
+      Request.validate_body(current_request_schema, conn.body_params)
+      |> handle_validation_result(handle_request_error, conn, Request.ErrorDescription)
 
     register_before_send = fn conn ->
-      parse_resp_body(conn.resp_body)
-      |> validate_response(current_request_schema, conn.status, ConnHelper.get_resp_header(conn, "content-type"))
-      |> handle_validation_result(handle_response_error, conn, Response.ErrorDescription)
+      conn =
+        parse_resp_body(conn.resp_body)
+        |> validate_response(current_request_schema, conn.status, ConnHelper.get_resp_header(conn, "content-type"))
+        |> handle_validation_result(handle_response_error, conn, Response.ErrorDescription)
 
       conn
     end
 
-    Plug.Conn.register_before_send(conn, register_before_send)
+    Plug.Conn.register_before_send(new_conn, register_before_send)
   end
 
   defp find_request_schema(request_schemas, conn) do
@@ -91,10 +93,10 @@ defmodule Plumbapius.AbstractPlug do
 
   defp validate_response(error, _request_schema, _status, _content_type), do: error
 
-  defp handle_validation_result(:ok, _error_handler, _conn, _validation_module), do: :ok
+  defp handle_validation_result(:ok, _error_handler, conn, _validation_module), do: conn
 
   defp handle_validation_result({:error, error}, error_handler, conn, error_module) do
     error_module.new(conn, error)
-    |> error_handler.()
+    |> error_handler.(conn)
   end
 end
