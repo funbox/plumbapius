@@ -21,19 +21,28 @@ defmodule Plumbapius.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       test_coverage: [tool: ExCoveralls],
       package: package(),
-      description: "Plumbapius",
-      dialyzer: [
-        plt_add_apps: [:mix]
-      ]
+      description: description(),
+      dialyzer:
+        [
+          plt_add_apps: [:mix]
+        ] ++ dialyzer()
     ]
   end
 
-  def package do
+  defp package do
     [
-      name: "plumbapius",
-      licenses: ["proprietary"],
-      links: %{funbox: "https://bb.funbox.ru/projects/APIB/repos/plumbapius/browse"}
+      name: :plumbapius,
+      files: ["lib", "mix.exs", "README*", "LICENSE"],
+      maintainers: ["Miroslav Malkin"],
+      licenses: ["Apache 2.0"],
+      links: %{
+        "GitHub" => "https://github.com/funbox/plumbapius"
+      }
     ]
+  end
+
+  defp description() do
+    "Plugs and tools for HTTP request/response validation according to API Blueprint specs"
   end
 
   defp elixirc_paths(env) when env in [:test], do: ["lib", "test/support"]
@@ -43,6 +52,16 @@ defmodule Plumbapius.MixProject do
     [
       extra_applications: [:logger]
     ]
+  end
+
+  defp dialyzer do
+    case System.get_env("DIALYZER_PLT_FILE") do
+      nil ->
+        []
+
+      file ->
+        [plt_file: {:no_warn, file}]
+    end
   end
 
   defp deps do

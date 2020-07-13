@@ -1,56 +1,62 @@
+[![Build Status](https://travis-ci.com/funbox/plumbapius.svg?branch=master)](https://travis-ci.com/funbox/plumbapius)
+[![Coverage Status](https://coveralls.io/repos/github/funbox/plumbapius/badge.svg?branch=master)](https://coveralls.io/github/funbox/plumbapius?branch=master)
+
+<a href="https://funbox.ru">
+  <img src="http://funbox.ru/badges/sponsored_by_funbox_compact.svg" alt="Sponsored by FunBox" width=250 />
+</a>
+
 # Plumbapius
 
-Plumbapius служит для валидации http запросов/ответов на соответсвие API Blueprint спецификации.
-Его можно использовать как в тестовой, так и в продакшен среде.
+Plumbapius is a tool for validation of http requests/responses according to API Blueprint specs.
 
-## Установка
+It can be used both in test and production environments.
+
+## Installation
 
 ```
 def deps do
   [
-    {:plumbapius, "~> 0.3.0", repo: :funbox}
+    {:plumbapius, "~> 0.7.1"}
   ]
 end
 ```
 
-Про внутренний репозиторий Hex Funbox: https://wiki.funbox.ru/pages/viewpage.action?pageId=58327725
+## Preparing json schema
 
-## Подготовка json schema
+Plumbapius requires conversion of apib to json schema.
 
-Для своей работы Plumbapius требует преобразования apib в json schema.
-
-Для облегчения процесса в Plumbapius есть mix таски:
+Some mix tasks to make this process easier are included:
 
 ### plumbapius.get_docs
 
-`mix plumbapius.get_docs -c ssh://git@git.funbox.ru/gc/ghetto-auth-apib.git -b master`
+`mix plumbapius.get_docs -c ssh://git@some-repo.com/some-repo.git -b master`
 
-Клонирует или обновляет репозиторий с apib в локальную папку в проекте (для случаев, когда apib в отдельной репе).
+Clones or updates repository with apib to local folder (it is usefull whet apib specs are in separate repo).
 
 ### plumbapius.setup_docs
 
 `mix plumbapius.setup_docs --from ./.apib/api.apib --into doc.json`
 
-Преобразует apib в json schema
+Converts apib to json shema
 
-Ддя работы требуются:
+It requires following tools to be installed (globally or in current Gemfile):
 
-- crafter (https://bb.funbox.ru/projects/APIB/repos/crafter)
+- drafter (https://github.com/apiaryio/drafter)
 - tomograph (https://github.com/funbox/tomograph)
 
-Предполагается, что таски будут запускаться руками по необходимости, и получившийся файл doc.json будет комититься в git.
+These tasks are supposed to be run manually and resulting json schema to be committed.
 
-## Использование в проекте
+## Usage
 
-Plumbapius реализует интерфейс Plug (https://hexdocs.pm/plug/Plug.html)
+Plumbapius implements Plug behaviour (https://hexdocs.pm/plug/Plug.html)
 
-Доступные plugs по-разному обрабатывают несоответствие запросов/ответов спецификации:
+Plugs provided:
 
-- `Plumbapius.Plug.LogValidationError` - только логирует
-- `Plumbapius.Plug.SendToSentryValidationError` - отправляет в Sentry
-- `Plumbapius.Plug.RaiseValidationError` - выбрасывает ошибку, подходит для использования в тестах
+- `Plumbapius.Plug.LogValidationError` - logs errors
+- `Plumbapius.Plug.SendToSentryValidationError` - posts errors to Sentry
+- `Plumbapius.Plug.RaiseValidationError` - raises error (usefull for test environment)
 
-## Пример использования
+## Examples
 
 router.exs
 
@@ -60,8 +66,6 @@ defmodule DogeApp.Api.Router do
 
   @json_schema_path "../../doc.json"
 
-  # Файл вкомпиливается в модуль, поэтому при изменении файла,
-  # необходимо перекомпилировать модуль
   @external_resource @json_schema_path
   @json_schema File.read!(@json_schema_path)
 
@@ -87,9 +91,9 @@ end
   config :doge_app, plumbapius_plug: Plumbapius.Plug.SendToSentryValidationError
   ```
 
-## Особенности использования в тестах
+## Usage in tests
 
-Иногда в тестах, чтобы проверить валидацию запросов или реакцию на ошибки, в аpi сознательно передаются данные, нарушающие спецификацию. Для таких случаев проверку Plumbapius можно отключить c помощью `Plumbapius.ignore`:
+In case you need to ignore Plumbapius validations (for error handling testing etc.), you can use `Plumbapius.ignore`
 
 ```elixir
 
