@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/funbox/plumbapius.svg?branch=master)](https://travis-ci.com/funbox/plumbapius)
+[![Build Status](https://travis-ci.org/funbox/plumbapius.svg?branch=master)](https://travis-ci.org/funbox/plumbapius)
 [![Coverage Status](https://coveralls.io/repos/github/funbox/plumbapius/badge.svg?branch=master)](https://coveralls.io/github/funbox/plumbapius?branch=master)
 
 <a href="https://funbox.ru">
