@@ -53,6 +53,16 @@ defmodule Plumbapius.ContentTypeTest do
       assert ContentType.match?("multipart/mixed; boundary=plug_conn_test", regex)
       refute ContentType.match?("multipart/mixed; boundary=plug_conn test", regex)
     end
+
+    test "ignores directives if no directives are defined in schema" do
+      assert ContentType.match?("application/json; charset=utf-8", "application/json")
+      refute ContentType.match?("application/other; charset=utf-8", "application/json")
+    end
+
+    test "does not ignore directives if directives are defined in schema" do
+      assert ContentType.match?("application/json; charset=utf-8", "application/json; charset=utf-8")
+      refute ContentType.match?("application/json; charset=cp1251", "application/json; charset=koi8-r")
+    end
   end
 
   defp assert_match(content_type, schema_content_type) do

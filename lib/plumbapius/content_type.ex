@@ -46,11 +46,20 @@ defmodule Plumbapius.ContentType do
 
   def match?(nil = _content_type, _schema_content_type), do: false
 
-  def match?(content_type, schema_content_type) when is_binary(schema_content_type) do
-    content_type == schema_content_type
+  def match?(content_type, %Regex{} = schema_content_type) do
+    String.match?(content_type, schema_content_type)
   end
 
-  def match?(content_type, schema_content_type) do
-    String.match?(content_type, schema_content_type)
+  def match?(content_type, schema_content_type) when is_binary(schema_content_type) do
+    content_type == schema_content_type ||
+      (!has_directives?(schema_content_type) && strip_directives(content_type) == schema_content_type)
+  end
+
+  def has_directives?(content_type) do
+    String.contains?(content_type, ";")
+  end
+
+  def strip_directives(content_type) do
+    content_type |> String.split(";", limit: 2) |> hd()
   end
 end
