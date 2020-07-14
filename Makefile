@@ -3,7 +3,7 @@
 prep:
 	make compile
 
-check: prep
+ci: prep
 	make check-syntax
 	make test
 	make dialyzer
