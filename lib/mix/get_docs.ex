@@ -55,7 +55,7 @@ defmodule Mix.Tasks.Plumbapius.GetDocs do
     Logger.info("Cloning #{git_uri} repository into #{local_folder} with branch #{branch}")
 
     with {_, 0} <- System.cmd("git", ["clone", git_uri, local_folder]),
-         {_, 0} <- System.cmd("git", ["checkout", branch]) do
+         {_, 0} <- System.cmd("git", ["-C", local_folder, "checkout", branch]) do
       Logger.info("Repository has been cloned successfully")
     else
       error ->
