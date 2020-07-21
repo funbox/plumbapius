@@ -6,7 +6,12 @@ defmodule Plumbapius.Request do
 
     @impl true
     def message(exception) do
-      "request #{exception.method}: #{exception.path} was not found in schema"
+      "Request.NotFoundError request #{exception.method}: #{exception.path} was not found in schema"
+    end
+
+    defimpl String.Chars do
+      @spec to_string(Exception.t()) :: String.t()
+      def to_string(exc), do: Exception.message(exc)
     end
   end
 
@@ -15,9 +20,14 @@ defmodule Plumbapius.Request do
 
     @impl true
     def message(exception) do
-      "request #{exception.method}: #{exception.path} " <>
+      "Request.UnknownContentTypeError request #{exception.method}: #{exception.path} " <>
         "with content-type: #{exception.content_type} was not found. " <>
         "Make sure you have correct `content-type` or `accept` headers in your request"
+    end
+
+    defimpl String.Chars do
+      @spec to_string(Exception.t()) :: String.t()
+      def to_string(exc), do: Exception.message(exc)
     end
   end
 
@@ -26,7 +36,12 @@ defmodule Plumbapius.Request do
 
     @impl true
     def message(exception) do
-      "request #{exception.method}: #{exception.path} has no content-type header"
+      "Request.NoContentTypeError request #{exception.method}: #{exception.path} has no content-type header"
+    end
+
+    defimpl String.Chars do
+      @spec to_string(Exception.t()) :: String.t()
+      def to_string(exc), do: Exception.message(exc)
     end
   end
 

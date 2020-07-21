@@ -4,7 +4,7 @@ defmodule FakePlugImplementation do
 
     @impl true
     def message(exception) do
-      "Plumpabius.RequestError: #{inspect(exception.error_message)}"
+      "Plumpabius.RequestError: #{exception.error_message}"
     end
   end
 
@@ -13,7 +13,7 @@ defmodule FakePlugImplementation do
 
     @impl true
     def message(exception) do
-      "Plumpabius.ResponseError: #{inspect(exception.error_message)}"
+      "Plumpabius.ResponseError: #{exception.error_message}"
     end
   end
 
