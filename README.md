@@ -16,7 +16,7 @@ It can be used both in test and production environments.
 ```
 def deps do
   [
-    {:plumbapius, "~> 0.8.1"}
+    {:plumbapius, "~> 0.9.0"}
   ]
 end
 ```
