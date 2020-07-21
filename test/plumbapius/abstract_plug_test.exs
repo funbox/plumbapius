@@ -4,7 +4,6 @@ defmodule Plumbapius.AbstractPlugTest do
 
   alias FakePlugImplementation, as: Helper
   alias Plumbapius.Plug.Options.IncorrectSchemaError
-  alias Plumbapius.Request.{NotFoundError, UnknownContentTypeError, NoContentTypeError}
   alias Plumbapius.AbstractPlug
 
   describe "test call method" do
@@ -20,7 +19,7 @@ defmodule Plumbapius.AbstractPlugTest do
     test "raises error when path exists in schema but method is wrong" do
       conn = conn(:get, "/sessions", %{"login" => "admin", "password" => "admin"})
 
-      assert_raise NotFoundError, fn -> call_plug(conn) end
+      assert_raise Helper.RequestHandlerRaiseError, ~r/Request.NotFoundError/, fn -> call_plug(conn) end
     end
 
     test "raises error when content-type header does not match specified in schema" do
@@ -28,17 +27,17 @@ defmodule Plumbapius.AbstractPlugTest do
         conn(:post, "/sessions", %{"login" => "admin", "password" => "admin"})
         |> put_req_header("content-type", "plain/text")
 
-      assert_raise UnknownContentTypeError, fn -> call_plug(conn) end
+      assert_raise Helper.RequestHandlerRaiseError, ~r/Request.UnknownContentTypeError/, fn -> call_plug(conn) end
     end
 
     test "raises error when content-type header is missing in post request" do
       conn = conn(:post, "/sessions")
-      assert_raise NoContentTypeError, fn -> call_plug(conn) end
+      assert_raise Helper.RequestHandlerRaiseError, ~r/Request.NoContentTypeError/, fn -> call_plug(conn) end
     end
 
     test "raises error when method is not specified" do
       conn = conn(nil, "/sessions", %{"login" => "admin", "password" => "admin"})
-      assert_raise NotFoundError, fn -> call_plug(conn) end
+      assert_raise Helper.RequestHandlerRaiseError, ~r/Request.NotFoundError/, fn -> call_plug(conn) end
     end
 
     test "raises error when path is not present in schema" do
@@ -46,7 +45,7 @@ defmodule Plumbapius.AbstractPlugTest do
         conn(:post, "/foo-bar", %{"login" => "admin", "password" => "admin"})
         |> put_req_header("content-type", "application/json")
 
-      assert_raise NotFoundError, fn -> call_plug(conn) end
+      assert_raise Helper.RequestHandlerRaiseError, ~r/Request.NotFoundError/, fn -> call_plug(conn) end
     end
 
     test "raises error when request params are incorrect" do

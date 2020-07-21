@@ -6,7 +6,7 @@ defmodule Plumbapius.Request do
 
     @impl true
     def message(exception) do
-      "request #{exception.method}: #{exception.path}"
+      "request #{exception.method}: #{exception.path} was not found in schema"
     end
   end
 
@@ -16,7 +16,7 @@ defmodule Plumbapius.Request do
     @impl true
     def message(exception) do
       "request #{exception.method}: #{exception.path} " <>
-        "with content-type: #{exception.content_type} not found. " <>
+        "with content-type: #{exception.content_type} was not found. " <>
         "Make sure you have correct `content-type` or `accept` headers in your request"
     end
   end

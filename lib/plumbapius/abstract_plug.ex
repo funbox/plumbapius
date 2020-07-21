@@ -19,16 +19,55 @@ defmodule Plumbapius.AbstractPlug do
   end
 
   def call(conn, options, handle_request_error, handle_response_error) do
-    current_request_schema = find_request_schema(options.schema, conn)
+    case find_request_schema(options.schema, conn) do
+      {:ok, request_schema} ->
+        validate_schema(request_schema, conn, handle_request_error, handle_response_error)
 
+      {:error, _} = error ->
+        handle_validation_result(error, handle_request_error, conn, Request.ErrorDescription)
+    end
+  end
+
+  defp find_request_schema(request_schemas, conn) do
+    case Enum.filter(request_schemas, &Request.match?(&1, conn.method, conn.request_path)) do
+      [] ->
+        {:error,
+         %Request.NotFoundError{
+           method: conn.method,
+           path: conn.request_path
+         }}
+
+      [_ | _] = schema_candidates ->
+        find_schema_by_content_type(conn, schema_candidates)
+    end
+  end
+
+  defp find_schema_by_content_type(conn, schema_candidates) do
+    with {:ok, content_type} <- content_type_for(conn) do
+      request_schema = Enum.find(schema_candidates, &ContentType.match?(content_type, &1.content_type))
+
+      if request_schema do
+        {:ok, request_schema}
+      else
+        {:error,
+         %Request.UnknownContentTypeError{
+           method: conn.method,
+           path: conn.request_path,
+           content_type: content_type
+         }}
+      end
+    end
+  end
+
+  defp validate_schema(request_schema, conn, handle_request_error, handle_response_error) do
     new_conn =
-      Request.validate_body(current_request_schema, conn.body_params)
+      Request.validate_body(request_schema, conn.body_params)
       |> handle_validation_result(handle_request_error, conn, Request.ErrorDescription)
 
     register_before_send = fn conn ->
       conn =
         parse_resp_body(conn.resp_body)
-        |> validate_response(current_request_schema, conn.status, ConnHelper.get_resp_header(conn, "content-type"))
+        |> validate_response(request_schema, conn.status, ConnHelper.get_resp_header(conn, "content-type"))
         |> handle_validation_result(handle_response_error, conn, Response.ErrorDescription)
 
       conn
@@ -41,41 +80,14 @@ defmodule Plumbapius.AbstractPlug do
     end
   end
 
-  defp find_request_schema(request_schemas, conn) do
-    schema_candidates = Enum.filter(request_schemas, &Request.match?(&1, conn.method, conn.request_path))
-
-    if Enum.empty?(schema_candidates) do
-      raise %Request.NotFoundError{
-        method: conn.method,
-        path: conn.request_path
-      }
-    end
-
-    content_type = content_type_for(conn)
-    request_schema = Enum.find(schema_candidates, &ContentType.match?(content_type, &1.content_type))
-
-    unless request_schema do
-      raise %Request.UnknownContentTypeError{
-        method: conn.method,
-        path: conn.request_path,
-        content_type: content_type
-      }
-    end
-
-    request_schema
-  end
-
   defp content_type_for(conn) do
     if has_body?(conn) do
-      content_type = ConnHelper.get_req_header(conn, "content-type")
-
-      unless content_type do
-        raise %Request.NoContentTypeError{method: conn.method, path: conn.request_path}
+      case ConnHelper.get_req_header(conn, "content-type") do
+        nil -> {:error, %Request.NoContentTypeError{method: conn.method, path: conn.request_path}}
+        content_type -> {:ok, content_type}
       end
-
-      content_type
     else
-      nil
+      {:ok, nil}
     end
   end
 
