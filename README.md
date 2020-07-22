@@ -21,7 +21,7 @@ end
 
 Plumbapius requires conversion of APIB to JSON schema.
 
-Some mix tasks to make this process easier are included and described below. 
+Some mix tasks to make this process easier are included and described below.
 These tasks are supposed to be run manually and resulting JSON schema to be committed.
 
 ### `plumbapius.get_docs`
@@ -30,7 +30,7 @@ These tasks are supposed to be run manually and resulting JSON schema to be comm
 mix plumbapius.get_docs -c ssh://git@some-repo.com/some-repo.git -b master
 ```
 
-Clones or updates repository with APIB to local folder (it is useful whet APIB specs are stored in separate repo).
+Clones or updates repository with APIB to local folder (it is useful when APIB specs are stored in separate repo).
 
 ### `plumbapius.setup_docs`
 
