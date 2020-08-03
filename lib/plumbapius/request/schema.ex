@@ -6,11 +6,12 @@ defmodule Plumbapius.Request.Schema do
   alias Plumbapius.Response.Schema, as: ResponseSchema
 
   @enforce_keys [:method, :path]
-  defstruct [:method, :path, :content_type, :body, responses: []]
+  defstruct [:method, :original_path, :path, :content_type, :body, responses: []]
 
   @typedoc "Request Schema"
   @type t :: %__MODULE__{
           method: String.t(),
+          original_path: String.t(),
           path: Regex.t(),
           content_type: Regex.t() | String.t() | :any_content_type,
           body: ExJsonSchema.Schema.Root.t(),
@@ -40,6 +41,7 @@ defmodule Plumbapius.Request.Schema do
       ...> })
       %Plumbapius.Request.Schema{
         method: "GET",
+        original_path: "/users/{id}",
         path: ~r/\\A\\/users\\/[^&=\\/]+\\z/,
         content_type: ~r/\\Amultipart\\/mixed; boundary=[^\\s]+\\z/,
         body: %ExJsonSchema.Schema.Root{
@@ -61,6 +63,7 @@ defmodule Plumbapius.Request.Schema do
   def new(tomogram) when is_map(tomogram) do
     %__MODULE__{
       method: Map.fetch!(tomogram, "method"),
+      original_path: Map.fetch!(tomogram, "path"),
       path: Map.fetch!(tomogram, "path") |> Path.to_regex(),
       content_type: Map.fetch!(tomogram, "content-type") |> ContentType.convert_for_schema(),
       body: Map.fetch!(tomogram, "request") |> ExJsonSchema.Schema.resolve(),

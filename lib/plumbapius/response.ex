@@ -1,60 +1,15 @@
 defmodule Plumbapius.Response do
   @moduledoc "Defines methods for validating responses by request schema"
 
+  alias __MODULE__
   alias Plumbapius.{ContentType, Request}
 
-  @doc """
-  Validates the response body according to the schema.
-
-  ## Parameters
-
-    - request_schema: Request schema with responses for validation.
-    - response_status: Response status.
-    - response_body: Response body to validate.
-
-  ## Examples
-
-      iex> request_schema = Plumbapius.Request.Schema.new(%{
-      ...>   "method"=>"GET",
-      ...>   "path"=>"/users",
-      ...>   "content-type"=>"application/json",
-      ...>   "request"=>%{
-      ...>     "$schema" => "http://json-schema.org/draft-04/schema#",
-      ...>     "type" => "object",
-      ...>     "properties" => %{"msisdn" => %{"type" => "number"}},
-      ...>     "required" => ["msisdn"]
-      ...>   },
-      ...>   "responses"=>[
-      ...>     %{
-      ...>       "content-type" => "application/json",
-      ...>       "status" => "200",
-      ...>       "body" => %{
-      ...>         "$schema" => "http://json-schema.org/draft-04/schema#",
-      ...>         "type"=> "object",
-      ...>         "properties" => %{
-      ...>           "field_name" => %{"type" => "string"}
-      ...>         },
-      ...>         "required" => ["field_name"],
-      ...>       }
-      ...>     }
-      ...>   ]
-      ...> })
-      iex> Plumbapius.Response.validate_response(request_schema, 200, "application/json", %{"field_name" => "foobar"})
-      :ok
-      iex> Plumbapius.Response.validate_response(request_schema, 200, "application/json", %{"another_field_name" => "12345"})
-      {:error, "no_such_response_in_schema"}
-      iex> Plumbapius.Response.validate_response(request_schema, 200, "text/plain", %{"field_name" => "foobar"})
-      {:error, "no_such_response_in_schema"}
-      iex> Plumbapius.Response.validate_response(request_schema, 401, "application/json", %{"field_name" => "foobar"})
-      {:error, "no_such_response_in_schema"}
-
-  """
   @spec validate_response(
           request_schema :: Request.Schema.t(),
           response_status :: non_neg_integer,
           response_content_type :: String.t(),
           body :: map
-        ) :: :ok | {:error, String.t()}
+        ) :: {:ok, Response.Schema.t()} | {:error, String.t()}
   def validate_response(request_schema, response_status, response_content_type, response_body) do
     request_schema.responses
     |> find_tomogram(response_status, response_content_type)
@@ -74,7 +29,7 @@ defmodule Plumbapius.Response do
   defp validate_body([response_schema | rest], response_body) do
     case ExJsonSchema.Validator.validate(response_schema.body, response_body) do
       :ok ->
-        :ok
+        {:ok, response_schema}
 
       _ ->
         validate_body(rest, response_body)

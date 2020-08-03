@@ -80,6 +80,7 @@ defmodule Plumbapius.MixProject do
 
   defp aliases do
     [
+      test: ["test --no-start"],
       cover: ["coveralls --sort cov:desc --umbrella"],
       "cover.lint": ["coveralls.lint --missed-lines-threshold=2 --required-file-coverage=0.9"],
       "cover.html": ["coveralls.html --umbrella"],

@@ -1,5 +1,5 @@
 defmodule Plumbapius.Plug.Options do
-  defstruct [:schema]
+  defstruct [:schema, :coverage_tracker]
 
   alias Plumbapius.Request
 
@@ -14,11 +14,13 @@ defmodule Plumbapius.Plug.Options do
 
   @spec new(json_schema: String.t()) :: t()
   def new(options) do
+    schema =
+      Keyword.fetch!(options, :json_schema)
+      |> parse_apib_json
+      |> create_schema
+
     %__MODULE__{
-      schema:
-        Keyword.fetch!(options, :json_schema)
-        |> parse_apib_json
-        |> create_schema
+      schema: schema
     }
   end
 

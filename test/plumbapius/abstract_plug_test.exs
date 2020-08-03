@@ -5,6 +5,8 @@ defmodule Plumbapius.AbstractPlugTest do
   alias FakePlugImplementation, as: Helper
   alias Plumbapius.Plug.Options.IncorrectSchemaError
   alias Plumbapius.AbstractPlug
+  alias Plumbapius.Request
+  alias Plumbapius.Response
 
   describe "test call method" do
     test "returns conn even for incorrect request when Plumbapius.ignore() is used" do
@@ -124,6 +126,18 @@ defmodule Plumbapius.AbstractPlugTest do
       send_resp(conn)
     end
 
+    test "calls coverage tracker" do
+      conn =
+        conn(:get, "/users")
+        |> call_plug()
+        |> resp(200, "{}")
+        |> put_resp_header("content-type", "application/json")
+
+      send_resp(conn)
+
+      assert_received({:response_covered_called, %Request.Schema{}, %Response.Schema{}})
+    end
+
     test "allows handle_request_error callback to modify conn" do
       conn =
         conn(:post, "/sessions", %{"foo" => "bar", "password" => "admin"})
@@ -176,14 +190,14 @@ defmodule Plumbapius.AbstractPlugTest do
   end
 
   describe "test init method" do
-    test "parse file with incorrect json structure raise IncorrectSchemaError" do
+    test "parses file with incorrect json structure raise IncorrectSchemaError" do
       init_options = [json_schema: File.read!("test/fixtures/incorrect_schema.json")]
       assert_raise IncorrectSchemaError, fn -> AbstractPlug.init(init_options) end
     end
 
-    test "parse correct json file" do
+    test "parses correct json file" do
       init_options = [json_schema: File.read!("test/fixtures/correct_schema.json")]
-      assert AbstractPlug.init(init_options) == Helper.options()
+      assert AbstractPlug.init(init_options).schema == Helper.options().schema
     end
   end
 

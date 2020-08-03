@@ -36,6 +36,7 @@ defmodule FakePlugImplementation do
         },
         content_type: "application/json",
         method: "POST",
+        original_path: "/sessions",
         path: ~r/\A\/sessions\z/,
         responses: [
           %Plumbapius.Response.Schema{
@@ -82,6 +83,7 @@ defmodule FakePlugImplementation do
       },
       %Plumbapius.Request.Schema{
         method: "GET",
+        original_path: "/users",
         path: ~r/\A\/users\z/,
         content_type: :any_content_type,
         body: %ExJsonSchema.Schema.Root{

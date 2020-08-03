@@ -7,7 +7,7 @@ defmodule Plumbapius.Plug.SendToSentryValidationErrorTest do
   test "init delegates to base Plug and returns options" do
     init_options = [json_schema: File.read!("test/fixtures/correct_schema.json")]
 
-    assert SendToSentryValidationError.init(init_options) == Helper.options()
+    assert SendToSentryValidationError.init(init_options).schema == Helper.options().schema
   end
 
   test "send RequestError into sentry when request invalid" do
