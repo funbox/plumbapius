@@ -104,4 +104,52 @@ test "replies with error if request contains malformed json", %{conn: conn} do
 end
 ```
 
+## Checking coverage
+
+A simple mix task is provided to check uncovered requests.
+
+First configure `preferred_cli_env` for plumbapius task
+
+```
+ def project do
+    [
+      preferred_cli_env: [
+        "plumbapius.cover": :test,
+      ]
+    ]
+  end
+```
+
+```
+> mix plumbapius.cover -s doc.json
+
+Covered cases:
+
+✔ POST  /bot/v1/{chatbot}/messages 202
+
+Missed cases:
+
+✖ POST  /bot/v1/{chatbot}/messages 400
+
+Coverage: 50.0%
+```
+
+Task fails with error code if coverage is below given min value
+
+```
+> mix plumbapius.cover -s doc.json --min-coverage=0.6
+
+Covered cases:
+
+✔ POST  /bot/v1/{chatbot}/messages 202
+
+Missed cases:
+
+✖ POST  /bot/v1/{chatbot}/messages 400
+
+Coverage: 50.0%
+
+ERROR! min coverage of 50.0% is required
+```
+
 [![Sponsored by FunBox](https://funbox.ru/badges/sponsored_by_funbox_centered.svg)](https://funbox.ru)

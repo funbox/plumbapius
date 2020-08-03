@@ -1,8 +1,10 @@
 defmodule Plumbapius.AbstractPlug do
   alias Plumbapius.{ContentType, Request, Response, ConnHelper}
   alias Plumbapius.Plug.Options
+  alias Plumbapius.Coverage.CoverageTracker
+  alias Plumbapius.Coverage.NullCoverageTracker
 
-  @spec init(json_schema: String.t()) :: Options.t()
+  @spec init(json_schema: String.t(), coverage_tracker: CoverageTracker.t()) :: Options.t()
   def init(options) do
     Options.new(options)
   end
@@ -68,7 +70,7 @@ defmodule Plumbapius.AbstractPlug do
       conn =
         parse_resp_body(conn.resp_body)
         |> validate_response(request_schema, conn.status, ConnHelper.get_resp_header(conn, "content-type"))
-        |> handle_validation_result(handle_response_error, conn, Response.ErrorDescription)
+        |> handle_resp_validation_result(request_schema, handle_response_error, conn)
 
       conn
     end
@@ -109,10 +111,35 @@ defmodule Plumbapius.AbstractPlug do
 
   defp validate_response(error, _request_schema, _status, _content_type), do: error
 
-  defp handle_validation_result(:ok, _error_handler, conn, _validation_module), do: conn
+  defp handle_resp_validation_result(
+         {:ok, %Response.Schema{} = response_schema},
+         request_schema,
+         _error_handler,
+         conn
+       ) do
+    coverage_tracker().response_covered(request_schema, response_schema)
+    conn
+  end
+
+  defp handle_resp_validation_result(
+         {:error, _} = error,
+         _request_schema,
+         error_handler,
+         conn
+       ) do
+    handle_validation_result(error, error_handler, conn, Response.ErrorDescription)
+  end
+
+  defp handle_validation_result(:ok, _error_handler, conn, _error_module) do
+    conn
+  end
 
   defp handle_validation_result({:error, error}, error_handler, conn, error_module) do
     error_module.new(conn, error)
     |> error_handler.(conn)
+  end
+
+  defp coverage_tracker do
+    Application.get_env(:plumbapius, :coverage_tracker, NullCoverageTracker)
   end
 end

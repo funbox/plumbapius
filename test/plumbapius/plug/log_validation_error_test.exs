@@ -8,7 +8,7 @@ defmodule Plumbapius.Plug.LogValidationErrorTest do
   test "init delegates to base Plug and returns options" do
     init_options = [json_schema: File.read!("test/fixtures/correct_schema.json")]
 
-    assert LogValidationError.init(init_options) == Helper.options()
+    assert LogValidationError.init(init_options).schema == Helper.options().schema
   end
 
   test "log request error" do

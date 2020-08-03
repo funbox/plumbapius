@@ -6,6 +6,7 @@ defmodule Plumbapius.Request.SchemaTest do
     test "when the tomogram is a valid request schema" do
       assert Plumbapius.Request.Schema.new(tomogram_schema()) == %Plumbapius.Request.Schema{
                method: "POST",
+               original_path: "/users/{id}",
                path: ~r/\A\/users\/[^&=\/]+\z/,
                content_type: "application/json",
                body: %ExJsonSchema.Schema.Root{
