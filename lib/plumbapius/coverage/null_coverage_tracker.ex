@@ -3,6 +3,7 @@ defmodule Plumbapius.Coverage.NullCoverageTracker do
 
   @behaviour CoverageTracker
 
+  @impl true
   def response_covered(_request_schema, _response_schema) do
     :ok
   end

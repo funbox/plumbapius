@@ -27,7 +27,7 @@ defmodule Plumbapius.Coverage.DefaultCoverageTracker do
   end
 
   @spec coverage_report() :: Report.t()
-  def coverage_report() do
+  def coverage_report do
     GenServer.call(__MODULE__, :coverage_report)
   end
 

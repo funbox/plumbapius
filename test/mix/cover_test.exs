@@ -22,7 +22,7 @@ defmodule Mix.Tasks.Plumbapius.CoverTest do
     assert catch_exit(run_cover(["--min-coverage=100"])) == {:shutdown, 1}
   end
 
-  def run_cover(args \\ []) do
+  defp run_cover(args \\ []) do
     capture_io(fn ->
       Mix.Task.rerun("plumbapius.cover", ["-s", "test/fixtures/correct_schema.json"] ++ args)
     end)

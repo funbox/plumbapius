@@ -34,12 +34,12 @@ defmodule Mix.Tasks.Plumbapius.Cover do
     Options.new(json_schema: schema_data).schema
   end
 
-  def check_coverage(real_coverage, min_coverage) when real_coverage < min_coverage do
+  defp check_coverage(real_coverage, min_coverage) when real_coverage < min_coverage do
     IO.puts("\nERROR! min coverage of #{min_coverage * 100}% is required")
     exit({:shutdown, 1})
   end
 
-  def check_coverage(_real_coverage, _min_coverage) do
+  defp check_coverage(_real_coverage, _min_coverage) do
     :ok
   end
 
