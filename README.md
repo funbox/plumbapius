@@ -12,7 +12,7 @@ It can be used both in test and production environments.
 ```elixir
 def deps do
   [
-    {:plumbapius, "~> 0.9.0"}
+    {:plumbapius, "~> 0.10.0"}
   ]
 end
 ```
