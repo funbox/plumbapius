@@ -20,7 +20,9 @@ defmodule Mix.Tasks.Plumbapius.Cover do
 
     Mix.Task.run("test")
 
-    report = DefaultCoverageTracker.coverage_report()
+    report =
+      DefaultCoverageTracker.coverage_report()
+      |> Report.ignore(ignore_patterns())
 
     report
     |> render_report()
@@ -92,5 +94,9 @@ defmodule Mix.Tasks.Plumbapius.Cover do
         ]
       ]
     )
+  end
+
+  def ignore_patterns do
+    Application.get_env(:plumbapius, :ignore_coverage, [])
   end
 end
