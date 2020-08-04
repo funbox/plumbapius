@@ -13,6 +13,13 @@ defmodule Mix.Tasks.Plumbapius.CoverTest do
     assert output =~ "Coverage: 0.0%"
   end
 
+  test "it reports covered and missed interactions in verbose mode" do
+    output = run_cover(["-v"])
+
+    assert output =~ ~r/POST\s+\/sessions 401/
+    assert output =~ ~r/#{Regex.escape(~s{"$schema" => "http://json-schema.org/draft-04/schema#"})}/
+  end
+
   test "it returns successfully when coverage is ok" do
     output = run_cover(["--min-coverage=0"])
     assert output =~ "Coverage: 0.0%"

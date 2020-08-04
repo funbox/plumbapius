@@ -25,7 +25,7 @@ defmodule Mix.Tasks.Plumbapius.Cover do
       |> Report.ignore(ignore_patterns())
 
     report
-    |> render_report()
+    |> render_report(cli.flags)
     |> IO.puts()
 
     check_coverage(Report.coverage(report), cli.options[:min_coverage])
@@ -45,14 +45,14 @@ defmodule Mix.Tasks.Plumbapius.Cover do
     :ok
   end
 
-  defp render_report(%Report{} = report) do
+  defp render_report(%Report{} = report, options) do
     [
       "\n",
       "Covered cases:\n\n",
-      render_interactions(report.covered, "✔ "),
+      render_interactions(report.covered, "✔ ", options),
       "\n",
       "Missed cases: \n\n",
-      render_interactions(report.missed, "✖ "),
+      render_interactions(report.missed, "✖ ", options),
       "\n",
       "Coverage: #{render_coverage(report)}%"
     ]
@@ -62,12 +62,36 @@ defmodule Mix.Tasks.Plumbapius.Cover do
     Float.round(Report.coverage(report) * 100, 1)
   end
 
-  defp render_interactions(interactions, prefix) do
-    Enum.map(interactions, &render_interaction(&1, prefix))
+  defp render_interactions(interactions, prefix, options) do
+    Enum.map(interactions, &render_interaction(&1, prefix, options))
   end
 
-  defp render_interaction({request, response}, prefix) do
-    [prefix, String.pad_trailing(request.method, 5), " ", request.original_path, " ", to_string(response.status), "\n"]
+  defp render_interaction({request, response}, prefix, options) do
+    header = [
+      prefix,
+      String.pad_trailing(request.method, 5),
+      " ",
+      request.original_path,
+      " ",
+      to_string(response.status),
+      "\n"
+    ]
+
+    if options[:verbose] do
+      header ++ ["\n", details(request, response), "\n\n"]
+    else
+      header
+    end
+  end
+
+  defp details(request, response) do
+    [
+      "REQUEST:\n",
+      inspect(request.body.schema),
+      "\n",
+      "RESPONSE:\n",
+      inspect(response.body.schema)
+    ]
   end
 
   defp cli_description do
@@ -90,6 +114,15 @@ defmodule Mix.Tasks.Plumbapius.Cover do
           help: "task fails when coverage is beneath given treshold",
           default: 0.0,
           parser: :float,
+          required: false
+        ]
+      ],
+      flags: [
+        verbose: [
+          value_name: "VERBOSE",
+          short: "-v",
+          help: "prints bodies of requests/responses",
+          default: false,
           required: false
         ]
       ]

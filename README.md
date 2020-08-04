@@ -152,6 +152,12 @@ Coverage: 50.0%
 ERROR! min coverage of 50.0% is required
 ```
 
+To see request/response schemas use `-v` option
+
+```
+> mix plumbapius.cover -s doc.json -v
+```
+
 You can configure plumbapius to ignore coverage for some requests:
 
 ```

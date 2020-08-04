@@ -1,5 +1,9 @@
 ### Changelog
 
+##### 0.12.0
+
+* `mix plumbapius.cover -v` option implemented
+
 ##### 0.11.0
 
 * `mix plumbapius.cover` can now ignore preconfigured requests (check readme)
