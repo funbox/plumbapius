@@ -1,5 +1,9 @@
 ### Changelog
 
+##### 0.11.0
+
+* `mix plumbapius.cover` can now ignore preconfigured requests (check readme)
+
 ##### 0.10.0
 
 * `mix plumbapius.cover` task for listing uncovered requests and checking min coverage

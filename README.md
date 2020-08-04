@@ -152,4 +152,14 @@ Coverage: 50.0%
 ERROR! min coverage of 50.0% is required
 ```
 
+You can configure plumbapius to ignore coverage for some requests:
+
+```
+config :plumbapius, ignore_coverage: [
+  # {method :: String.t() | atom, path :: String.t() | Regex.t(), status :: pos_integer() | :all}
+  {"GET", "/bot/v1/{chatbot}/messages", 400},
+  {:all, "/admin/users/", :all},
+]
+```
+
 [![Sponsored by FunBox](https://funbox.ru/badges/sponsored_by_funbox_centered.svg)](https://funbox.ru)
