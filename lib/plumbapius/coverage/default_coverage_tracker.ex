@@ -1,6 +1,7 @@
 defmodule Plumbapius.Coverage.DefaultCoverageTracker do
   use GenServer
   alias Plumbapius.Coverage.CoverageTracker
+  alias Plumbapius.Coverage.CoverageTracker.CoveredCase
   alias Plumbapius.Coverage.Report
   alias Plumbapius.Request
 
@@ -9,7 +10,7 @@ defmodule Plumbapius.Coverage.DefaultCoverageTracker do
   defmodule State do
     @type t :: %__MODULE__{
             schema: list(Request.Schema.t()),
-            covered: list(CoverageTracker.interaction())
+            covered: list(CoveredCase.t())
           }
 
     defstruct schema: nil,
@@ -22,8 +23,8 @@ defmodule Plumbapius.Coverage.DefaultCoverageTracker do
   end
 
   @impl true
-  def response_covered(request_schema, response_schema) do
-    GenServer.call(__MODULE__, {:response_covered, request_schema, response_schema})
+  def response_covered(covered_interaction) do
+    GenServer.call(__MODULE__, {:response_covered, covered_interaction})
   end
 
   @spec coverage_report() :: Report.t()
@@ -37,8 +38,8 @@ defmodule Plumbapius.Coverage.DefaultCoverageTracker do
   end
 
   @impl GenServer
-  def handle_call({:response_covered, request_schema, response_schema}, _from, %State{} = st) do
-    new_st = %{st | covered: [{request_schema, response_schema} | st.covered]}
+  def handle_call({:response_covered, covered_case}, _from, %State{} = st) do
+    new_st = %{st | covered: [covered_case | st.covered]}
     {:reply, :ok, new_st}
   end
 

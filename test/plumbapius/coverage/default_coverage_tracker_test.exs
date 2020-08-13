@@ -2,6 +2,7 @@ defmodule Plumbapius.Coverage.DefaultCoverageTrackerTest do
   use ExUnit.Case
 
   alias Plumbapius.Coverage.DefaultCoverageTracker
+  alias Plumbapius.Coverage.CoverageTracker.CoveredCase
   alias Plumbapius.Request.Schema, as: RequestSchema
   alias Plumbapius.Response.Schema, as: ResponseSchema
 
@@ -12,7 +13,7 @@ defmodule Plumbapius.Coverage.DefaultCoverageTrackerTest do
 
     start_supervised!({DefaultCoverageTracker, all_schemas})
 
-    assert :ok = DefaultCoverageTracker.response_covered(covered_schema, response(200))
+    assert :ok = DefaultCoverageTracker.response_covered(CoveredCase.new({covered_schema, response(200)}))
     report = DefaultCoverageTracker.coverage_report()
 
     assert report.covered == [{covered_schema, response(200)}]

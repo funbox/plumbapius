@@ -2,6 +2,7 @@ defmodule Plumbapius.Coverage.ReportTest do
   use ExUnit.Case, async: true
 
   alias Plumbapius.Coverage.Report
+  alias Plumbapius.Coverage.CoverageTracker.CoveredCase
   alias Plumbapius.Request.Schema, as: RequestSchema
   alias Plumbapius.Response.Schema, as: ResponseSchema
 
@@ -14,7 +15,7 @@ defmodule Plumbapius.Coverage.ReportTest do
       covered_interaction = {covered_schema, response(200)}
       missed_interaction = {missed_schema, response(500)}
 
-      report = Report.new(all_schemas, [covered_interaction])
+      report = Report.new(all_schemas, [CoveredCase.new(covered_interaction)])
       assert report.all == [covered_interaction, missed_interaction]
       assert report.covered == [covered_interaction]
       assert report.missed == [missed_interaction]
@@ -28,7 +29,7 @@ defmodule Plumbapius.Coverage.ReportTest do
       all_schemas = [covered_schema, missed_schema]
 
       covered_interaction = {covered_schema, response(200)}
-      assert Report.new(all_schemas, [covered_interaction]) |> Report.coverage() == 0.5
+      assert Report.new(all_schemas, [CoveredCase.new(covered_interaction)]) |> Report.coverage() == 0.5
     end
   end
 
@@ -38,7 +39,7 @@ defmodule Plumbapius.Coverage.ReportTest do
       schema2 = %RequestSchema{method: "GET", path: "", original_path: "/other/path", responses: [response(202)]}
       all_schemas = [schema1, schema2]
 
-      report = Report.new(all_schemas, [{schema1, response(200)}])
+      report = Report.new(all_schemas, [CoveredCase.new({schema1, response(200)})])
 
       assert Report.ignore(report, [{"GET", "/other/path", :all}]) == %Report{
                all: [{schema1, response(200)}],
@@ -52,7 +53,7 @@ defmodule Plumbapius.Coverage.ReportTest do
       schema2 = %RequestSchema{method: "GET", path: "", original_path: "/other/path", responses: [response(202)]}
       all_schemas = [schema1, schema2]
 
-      report = Report.new(all_schemas, [{schema1, response(200)}])
+      report = Report.new(all_schemas, [CoveredCase.new({schema1, response(200)})])
 
       assert Report.ignore(report, [{"GET", ~r|/other/.+|, :all}]) == %Report{
                all: [{schema1, response(200)}],
@@ -66,7 +67,7 @@ defmodule Plumbapius.Coverage.ReportTest do
       schema2 = %RequestSchema{method: "GET", path: "", original_path: "/some/path", responses: [response(202)]}
       all_schemas = [schema1, schema2]
 
-      report = Report.new(all_schemas, [{schema1, response(200)}])
+      report = Report.new(all_schemas, [CoveredCase.new({schema1, response(200)})])
 
       assert Report.ignore(report, [{"GET", ~r|/some/.+|, 202}]) == %Report{
                all: [{schema1, response(200)}],
@@ -80,7 +81,7 @@ defmodule Plumbapius.Coverage.ReportTest do
       schema2 = %RequestSchema{method: "POST", path: "", original_path: "/some/path", responses: [response(202)]}
       all_schemas = [schema1, schema2]
 
-      report = Report.new(all_schemas, [{schema1, response(200)}])
+      report = Report.new(all_schemas, [CoveredCase.new({schema1, response(200)})])
 
       assert Report.ignore(report, [{:all, "/some/path", :all}]) == %Report{
                all: [],

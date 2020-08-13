@@ -4,7 +4,7 @@ defmodule Plumbapius.Coverage.NullCoverageTracker do
   @behaviour CoverageTracker
 
   @impl true
-  def response_covered(_request_schema, _response_schema) do
+  def response_covered(_covered_case) do
     :ok
   end
 end

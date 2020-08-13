@@ -1,5 +1,6 @@
 defmodule Plumbapius.Coverage.Report do
   alias Plumbapius.Coverage.CoverageTracker
+  alias Plumbapius.Coverage.CoverageTracker.CoveredCase
   alias Plumbapius.Request
 
   @type t :: %__MODULE__{
@@ -12,14 +13,15 @@ defmodule Plumbapius.Coverage.Report do
             missed: [],
             covered: []
 
-  @spec new(list(Request.Schema.t()), list(CoverageTracker.interaction())) :: t
+  @spec new(list(Request.Schema.t()), list(CoveredCase.t())) :: t
   def new(schema, covered_interactions) do
     all_interactions = Enum.flat_map(schema, &request_interactions/1)
+    covered = Enum.map(covered_interactions, & &1.interaction)
 
     %__MODULE__{
       all: all_interactions,
-      missed: all_interactions -- covered_interactions,
-      covered: covered_interactions
+      missed: all_interactions -- covered,
+      covered: covered
     }
   end
 

@@ -3,7 +3,7 @@ defmodule FakeCoverageTracker do
   @behaviour CoverageTracker
 
   @impl true
-  def response_covered(request_schema, response_schema) do
-    send(self(), {:response_covered_called, request_schema, response_schema})
+  def response_covered(covered_case) do
+    send(self(), {:response_covered_called, covered_case})
   end
 end

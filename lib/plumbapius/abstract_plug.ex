@@ -2,6 +2,7 @@ defmodule Plumbapius.AbstractPlug do
   alias Plumbapius.{ContentType, Request, Response, ConnHelper}
   alias Plumbapius.Plug.Options
   alias Plumbapius.Coverage.CoverageTracker
+  alias Plumbapius.Coverage.CoverageTracker.CoveredCase
   alias Plumbapius.Coverage.NullCoverageTracker
 
   @spec init(json_schema: String.t(), coverage_tracker: CoverageTracker.t()) :: Options.t()
@@ -67,12 +68,11 @@ defmodule Plumbapius.AbstractPlug do
       |> handle_validation_result(handle_request_error, conn, Request.ErrorDescription)
 
     register_before_send = fn conn ->
-      conn =
-        parse_resp_body(conn.resp_body)
-        |> validate_response(request_schema, conn.status, ConnHelper.get_resp_header(conn, "content-type"))
-        |> handle_resp_validation_result(request_schema, handle_response_error, conn)
-
-      conn
+      with {:ok, resp_body} <- parse_resp_body(conn.resp_body) do
+        request_schema
+        |> Response.validate_response(conn.status, ConnHelper.get_resp_header(conn, "content-type"), resp_body)
+        |> handle_resp_validation_result(request_schema, handle_response_error, conn, resp_body)
+      end
     end
 
     if new_conn.state == :sent do
@@ -100,24 +100,21 @@ defmodule Plumbapius.AbstractPlug do
   defp parse_resp_body(""), do: {:ok, %{}}
   defp parse_resp_body(body), do: Jason.decode(body)
 
-  defp validate_response({:ok, resp_body}, request_schema, status, content_type) do
-    Response.validate_response(
-      request_schema,
-      status,
-      content_type,
-      resp_body
-    )
-  end
-
-  defp validate_response(error, _request_schema, _status, _content_type), do: error
-
   defp handle_resp_validation_result(
          {:ok, %Response.Schema{} = response_schema},
          request_schema,
          _error_handler,
-         conn
+         conn,
+         resp_body
        ) do
-    coverage_tracker().response_covered(request_schema, response_schema)
+    coverage_tracker().response_covered(
+      CoveredCase.new(
+        {request_schema, response_schema},
+        conn.body_params,
+        resp_body
+      )
+    )
+
     conn
   end
 
@@ -125,7 +122,8 @@ defmodule Plumbapius.AbstractPlug do
          {:error, _} = error,
          _request_schema,
          error_handler,
-         conn
+         conn,
+         _resp_body
        ) do
     handle_validation_result(error, error_handler, conn, Response.ErrorDescription)
   end
