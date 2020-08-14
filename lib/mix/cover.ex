@@ -49,7 +49,7 @@ defmodule Mix.Tasks.Plumbapius.Cover do
     [
       "\n",
       "Covered cases:\n\n",
-      render_interactions(report.covered, "✔ ", options),
+      render_interaction_reports(report.covered, options),
       "\n",
       "Missed cases: \n\n",
       render_interactions(report.missed, "✖ ", options),
@@ -60,6 +60,11 @@ defmodule Mix.Tasks.Plumbapius.Cover do
 
   defp render_coverage(report) do
     Float.round(Report.coverage(report) * 100, 1)
+  end
+
+  defp render_interaction_reports(interaction_reports, options) do
+    # TODO render multiple choices coverage
+    Enum.map(interaction_reports, &render_interaction(&1.interaction, "✔ ", options))
   end
 
   defp render_interactions(interactions, prefix, options) do

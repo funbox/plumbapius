@@ -1,27 +1,26 @@
 defmodule Plumbapius.Coverage.Report do
   alias Plumbapius.Coverage.CoverageTracker
   alias Plumbapius.Coverage.CoverageTracker.CoveredCase
+  alias Plumbapius.Coverage.Report.InteractionReport
   alias Plumbapius.Request
 
   @type t :: %__MODULE__{
-          all: list(CoverageTracker.interaction()),
           missed: list(CoverageTracker.interaction()),
           covered: list(CoverageTracker.interaction())
         }
 
-  defstruct all: [],
+  defstruct multi_choices: %{},
             missed: [],
             covered: []
 
   @spec new(list(Request.Schema.t()), list(CoveredCase.t())) :: t
-  def new(schema, covered_interactions) do
+  def new(schema, covered_cases) do
     all_interactions = Enum.flat_map(schema, &request_interactions/1)
-    covered = Enum.map(covered_interactions, & &1.interaction)
+    covered_interactions = Enum.map(covered_cases, & &1.interaction)
 
     %__MODULE__{
-      all: all_interactions,
-      missed: all_interactions -- covered,
-      covered: covered
+      missed: all_interactions -- covered_interactions,
+      covered: Enum.map(covered_cases, &InteractionReport.new/1)
     }
   end
 
@@ -37,15 +36,20 @@ defmodule Plumbapius.Coverage.Report do
   @spec ignore(t, list(ignore_pattern)) :: t
   def ignore(report, patterns) do
     %__MODULE__{
-      all: reject_interactions(report.all, patterns),
       missed: reject_interactions(report.missed, patterns),
-      covered: reject_interactions(report.covered, patterns)
+      covered: reject_reports(report.covered, patterns)
     }
   end
 
   defp reject_interactions(interactions, patterns) do
     Enum.reject(interactions, fn interaction ->
       Enum.any?(patterns, &matches?(interaction, &1))
+    end)
+  end
+
+  defp reject_reports(reports, patterns) do
+    Enum.reject(reports, fn report ->
+      Enum.any?(patterns, &matches?(report.interaction, &1))
     end)
   end
 
