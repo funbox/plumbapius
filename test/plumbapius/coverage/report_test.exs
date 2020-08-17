@@ -17,7 +17,7 @@ defmodule Plumbapius.Coverage.ReportTest do
       missed_interaction = {missed_schema, response(500)}
 
       report = Report.new(all_schemas, [CoveredCase.new(covered_interaction)])
-      assert report.covered == [InteractionReport.new(covered_interaction)]
+      assert report.interaction_reports == [InteractionReport.new(covered_interaction)]
       assert report.missed == [missed_interaction]
     end
   end
@@ -30,6 +30,39 @@ defmodule Plumbapius.Coverage.ReportTest do
 
       covered_interaction = {covered_schema, response(200)}
       assert Report.new(all_schemas, [CoveredCase.new(covered_interaction)]) |> Report.coverage() == 0.5
+    end
+  end
+
+  describe "#multi_choice_coverage" do
+    @json_schema %{
+      "$schema" => "http://json-schema.org/draft-04/schema#",
+      "type" => "object",
+      "properties" => %{
+        "kind" => %{
+          "type" => "string",
+          "enum" => [
+            "textMessage",
+            "fileMessage"
+          ]
+        }
+      },
+      "required" => [
+        "kind"
+      ]
+    }
+
+    test "returns coverage percentage including multichoices" do
+      schema = %RequestSchema{
+        method: "GET",
+        path: "",
+        original_path: "/some/path",
+        responses: [response(200)],
+        body: ExJsonSchema.Schema.resolve(@json_schema)
+      }
+
+      interaction = {schema, response(200)}
+      req_body = %{"kind" => "textMessage"}
+      assert Report.new([schema], [CoveredCase.new(interaction, req_body)]) |> Report.multi_choice_coverage() == 0.5
     end
   end
 
@@ -56,7 +89,9 @@ defmodule Plumbapius.Coverage.ReportTest do
       report = Report.new(all_schemas, [CoveredCase.new({schema1, response(200)})])
 
       assert Report.ignore(report, [{"GET", "/other/path", :all}]) == %Report{
-               covered: [InteractionReport.new({schema1, response(200)})],
+               multi_choices: %{{schema1, response(200)} => []},
+               interaction_reports: [InteractionReport.new({schema1, response(200)})],
+               covered: [{schema1, response(200)}],
                missed: []
              }
     end
@@ -83,7 +118,9 @@ defmodule Plumbapius.Coverage.ReportTest do
       report = Report.new(all_schemas, [CoveredCase.new({schema1, response(200)})])
 
       assert Report.ignore(report, [{"GET", ~r|/other/.+|, :all}]) == %Report{
-               covered: [InteractionReport.new({schema1, response(200)})],
+               multi_choices: %{{schema1, response(200)} => []},
+               interaction_reports: [InteractionReport.new({schema1, response(200)})],
+               covered: [{schema1, response(200)}],
                missed: []
              }
     end
@@ -110,7 +147,9 @@ defmodule Plumbapius.Coverage.ReportTest do
       report = Report.new(all_schemas, [CoveredCase.new({schema1, response(200)})])
 
       assert Report.ignore(report, [{"GET", ~r|/some/.+|, 202}]) == %Report{
-               covered: [InteractionReport.new({schema1, response(200)})],
+               multi_choices: %{{schema1, response(200)} => []},
+               interaction_reports: [InteractionReport.new({schema1, response(200)})],
+               covered: [{schema1, response(200)}],
                missed: []
              }
     end
@@ -137,7 +176,8 @@ defmodule Plumbapius.Coverage.ReportTest do
       report = Report.new(all_schemas, [CoveredCase.new({schema1, response(200)})])
 
       assert Report.ignore(report, [{:all, "/some/path", :all}]) == %Report{
-               covered: [],
+               multi_choices: %{},
+               interaction_reports: [],
                missed: []
              }
     end

@@ -24,16 +24,26 @@ defmodule Mix.Tasks.Plumbapius.Cover do
       DefaultCoverageTracker.coverage_report()
       |> Report.ignore(ignore_patterns())
 
+    coverage = coverage(report, cli.flags)
+
     report
-    |> render_report(cli.flags)
+    |> render_report(coverage, cli.flags)
     |> IO.puts()
 
-    check_coverage(Report.coverage(report), cli.options[:min_coverage])
+    check_coverage(coverage, cli.options[:min_coverage])
   end
 
   defp load_schema(schema_data) do
     schema_data = File.read!(schema_data)
     Options.new(json_schema: schema_data).schema
+  end
+
+  defp coverage(report, options) do
+    if options[:multi_choices] do
+      Report.multi_choice_coverage(report)
+    else
+      Report.coverage(report)
+    end
   end
 
   defp check_coverage(real_coverage, min_coverage) when real_coverage < min_coverage do
@@ -45,26 +55,46 @@ defmodule Mix.Tasks.Plumbapius.Cover do
     :ok
   end
 
-  defp render_report(%Report{} = report, options) do
+  defp render_report(%Report{} = report, coverage, options) do
     [
       "\n",
       "Covered cases:\n\n",
-      render_interaction_reports(report.covered, options),
+      render_interactions(report.covered, "✔ ", options),
       "\n",
       "Missed cases: \n\n",
       render_interactions(report.missed, "✖ ", options),
+      if(options[:multi_choices], do: render_multi_reports(report.interaction_reports), else: ""),
       "\n",
-      "Coverage: #{render_coverage(report)}%"
+      "Coverage: #{render_coverage(coverage)}%"
     ]
   end
 
-  defp render_coverage(report) do
-    Float.round(Report.coverage(report) * 100, 1)
+  defp render_coverage(coverage) do
+    Float.round(coverage * 100, 1)
   end
 
-  defp render_interaction_reports(interaction_reports, options) do
-    # TODO render multiple choices coverage
-    Enum.map(interaction_reports, &render_interaction(&1.interaction, "✔ ", options))
+  defp render_multi_reports(reports) do
+    [
+      "\n",
+      "MISSED oneOfs and enums:\n\n",
+      Enum.map(reports, &render_multi_choices/1),
+      "\n"
+    ]
+  end
+
+  defp render_multi_choices(report) do
+    Enum.map(report.missed_multi_choices, &render_missed_choice(report.interaction, &1))
+  end
+
+  defp render_missed_choice(interaction, {path, schema}) do
+    [
+      render_interaction_header(interaction, "✖ "),
+      " ",
+      Enum.join(path, "."),
+      "\n",
+      inspect(schema),
+      "\n\n"
+    ]
   end
 
   defp render_interactions(interactions, prefix, options) do
@@ -72,21 +102,24 @@ defmodule Mix.Tasks.Plumbapius.Cover do
   end
 
   defp render_interaction({request, response}, prefix, options) do
-    header = [
-      prefix,
-      String.pad_trailing(request.method, 5),
-      " ",
-      request.original_path,
-      " ",
-      to_string(response.status),
-      "\n"
-    ]
+    header = render_interaction_header({request, response}, prefix) ++ ["\n"]
 
     if options[:verbose] do
       header ++ ["\n", details(request, response), "\n\n"]
     else
       header
     end
+  end
+
+  defp render_interaction_header({request, response}, prefix) do
+    [
+      prefix,
+      String.pad_trailing(request.method, 5),
+      " ",
+      request.original_path,
+      " ",
+      to_string(response.status)
+    ]
   end
 
   defp details(request, response) do
@@ -127,6 +160,13 @@ defmodule Mix.Tasks.Plumbapius.Cover do
           value_name: "VERBOSE",
           short: "-v",
           help: "prints bodies of requests/responses",
+          default: false,
+          required: false
+        ],
+        multi_choices: [
+          value_name: "MULTI_CHOICES",
+          short: "-m",
+          help: "computes coverage of oneOfs and enums",
           default: false,
           required: false
         ]

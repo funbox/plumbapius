@@ -1,7 +1,17 @@
 defmodule Plumbapius.Coverage.Report.MultiChoiceSchema do
-  @type multi_choice :: {path :: list(String.t()), schema :: map()}
+  alias Plumbapius.Coverage.CoverageTracker
 
+  @type multi_choice :: {path :: list(String.t()), schema :: map()}
   @type t :: list(multi_choice)
+
+  @spec multi_choices(list(CoverageTracker.interaction())) :: %{
+          optional(CoverageTracker.interaction()) => list(multi_choice())
+        }
+  def multi_choices(interactions) do
+    interactions
+    |> Enum.map(fn {req, resp} = interaction -> {interaction, new(req.body.schema) ++ new(resp.body.schema)} end)
+    |> Enum.into(%{})
+  end
 
   @spec new(map) :: t
   def new(schema) do

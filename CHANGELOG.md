@@ -1,5 +1,9 @@
 ### Changelog
 
+##### 0.13.0
+
+* `mix plumbapius.cover -m` option implemented. It enables oneOfs and enums coverage tracking.
+
 ##### 0.12.0
 
 * `mix plumbapius.cover -v` option implemented

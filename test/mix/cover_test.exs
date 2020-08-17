@@ -29,6 +29,11 @@ defmodule Mix.Tasks.Plumbapius.CoverTest do
     assert catch_exit(run_cover(["--min-coverage=100"])) == {:shutdown, 1}
   end
 
+  test "it shows oneOfs and enums" do
+    output = run_cover(["-m"])
+    assert output =~ "MISSED oneOfs and enums"
+  end
+
   defp run_cover(args \\ []) do
     capture_io(fn ->
       Mix.Task.rerun("plumbapius.cover", ["-s", "test/fixtures/correct_schema.json"] ++ args)

@@ -17,7 +17,7 @@ defmodule Plumbapius.Coverage.DefaultCoverageTrackerTest do
     assert :ok = DefaultCoverageTracker.response_covered(CoveredCase.new({covered_schema, response(200)}))
     report = DefaultCoverageTracker.coverage_report()
 
-    assert report.covered == [%InteractionReport{interaction: {covered_schema, response(200)}}]
+    assert report.interaction_reports == [%InteractionReport{interaction: {covered_schema, response(200)}}]
     assert report.missed == [{missed_schema, response(500)}]
   end
 
