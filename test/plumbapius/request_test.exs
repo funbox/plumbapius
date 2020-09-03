@@ -2,19 +2,33 @@ defmodule Plumbapius.RequestTest do
   use ExUnit.Case, async: true
   doctest Plumbapius.Request
   alias Plumbapius.Request
+  alias Plumbapius.Request.NotFoundSchemaForReqestBodyError
 
   describe "#validate_body" do
-    test "when the request according to the schema" do
+    test "when the body according to the schema with 1 body option" do
       request_body = %{"msisdn" => 123}
 
       assert Request.validate_body(request_schema(), request_body) == :ok
     end
 
-    test "when the msisdn in the request is string" do
+    test "when the body does not match the schema with 1 body option" do
       request_body = %{"msisdn" => "123"}
 
-      assert {:error, error} = Request.validate_body(request_schema(), request_body)
-      assert error =~ "#/msisdn"
+      assert Request.validate_body(request_schema(), request_body) == {:error, %NotFoundSchemaForReqestBodyError{}}
+    end
+
+    test "when the body according one of 2 body options of the schema" do
+      schema = request_schema_with_two_requests()
+
+      assert Request.validate_body(schema, %{"msisdn" => 123}) == :ok
+      assert Request.validate_body(schema, %{"phoneNumber" => 123}) == :ok
+    end
+
+    test "when the body does not match any of 2 body options of the schema" do
+      schema = request_schema_with_two_requests()
+
+      assert Request.validate_body(schema, %{"msisdn" => "123"}) == {:error, %NotFoundSchemaForReqestBodyError{}}
+      assert Request.validate_body(schema, %{"phoneNumber" => "123"}) == {:error, %NotFoundSchemaForReqestBodyError{}}
     end
   end
 
@@ -43,6 +57,29 @@ defmodule Plumbapius.RequestTest do
         "properties" => %{"msisdn" => %{"type" => "number"}},
         "required" => ["msisdn"]
       },
+      "responses" => []
+    })
+  end
+
+  defp request_schema_with_two_requests do
+    Request.Schema.new(%{
+      "method" => "GET",
+      "path" => "/users/{id}",
+      "content-type" => "application/json",
+      "requests" => [
+        %{
+          "$schema" => "http://json-schema.org/draft-04/schema#",
+          "type" => "object",
+          "properties" => %{"msisdn" => %{"type" => "number"}},
+          "required" => ["msisdn"]
+        },
+        %{
+          "$schema" => "http://json-schema.org/draft-04/schema#",
+          "type" => "object",
+          "properties" => %{"phoneNumber" => %{"type" => "number"}},
+          "required" => ["phoneNumber"]
+        }
+      ],
       "responses" => []
     })
   end

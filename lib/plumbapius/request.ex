@@ -45,16 +45,30 @@ defmodule Plumbapius.Request do
     end
   end
 
+  defmodule NotFoundSchemaForReqestBodyError do
+    defexception []
+
+    @impl true
+    def message(_exception) do
+      "not found schema for reqest body"
+    end
+  end
+
   alias Plumbapius.Request
 
   @spec validate_body(Request.Schema.t(), map()) :: :ok | {:error, list()}
   def validate_body(request_schema, request_body) do
-    case ExJsonSchema.Validator.validate(request_schema.body, request_body) do
-      :ok ->
-        :ok
+    validate_request_body(request_schema.bodies, request_body)
+  end
 
-      {:error, errors} ->
-        {:error, Enum.map_join(errors, ", ", &format_schema_error/1)}
+  defp validate_request_body([], _request_body) do
+    {:error, %NotFoundSchemaForReqestBodyError{}}
+  end
+
+  defp validate_request_body([body_schema | body_schemes], request_body) do
+    case ExJsonSchema.Validator.validate(body_schema, request_body) do
+      :ok -> :ok
+      {:error, _} -> validate_request_body(body_schemes, request_body)
     end
   end
 
@@ -63,9 +77,5 @@ defmodule Plumbapius.Request do
 
   def match?(schema, request_method, request_path) do
     String.match?(request_path, schema.path) && schema.method == request_method
-  end
-
-  defp format_schema_error({description, json_path}) do
-    "#{json_path}: #{description}"
   end
 end

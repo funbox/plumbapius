@@ -20,20 +20,22 @@ defmodule FakePlugImplementation do
   @options %Plumbapius.Plug.Options{
     schema: [
       %Plumbapius.Request.Schema{
-        body: %ExJsonSchema.Schema.Root{
-          custom_format_validator: nil,
-          location: :root,
-          refs: %{},
-          schema: %{
-            "$schema" => "http://json-schema.org/draft-04/schema#",
-            "properties" => %{
-              "login" => %{"type" => "string"},
-              "password" => %{"type" => "string"}
-            },
-            "required" => ["login", "password"],
-            "type" => "object"
+        bodies: [
+          %ExJsonSchema.Schema.Root{
+            custom_format_validator: nil,
+            location: :root,
+            refs: %{},
+            schema: %{
+              "$schema" => "http://json-schema.org/draft-04/schema#",
+              "properties" => %{
+                "login" => %{"type" => "string"},
+                "password" => %{"type" => "string"}
+              },
+              "required" => ["login", "password"],
+              "type" => "object"
+            }
           }
-        },
+        ],
         content_type: "application/json",
         method: "POST",
         original_path: "/sessions",
@@ -86,12 +88,14 @@ defmodule FakePlugImplementation do
         original_path: "/users",
         path: ~r/\A\/users\z/,
         content_type: :any_content_type,
-        body: %ExJsonSchema.Schema.Root{
-          custom_format_validator: nil,
-          location: :root,
-          refs: %{},
-          schema: %{}
-        },
+        bodies: [
+          %ExJsonSchema.Schema.Root{
+            custom_format_validator: nil,
+            location: :root,
+            refs: %{},
+            schema: %{}
+          }
+        ],
         responses: [
           %Plumbapius.Response.Schema{
             body: %ExJsonSchema.Schema.Root{

@@ -87,11 +87,20 @@ defmodule Mix.Tasks.Plumbapius.Cover do
   defp details(request, response) do
     [
       "REQUEST:\n",
-      inspect(request.body.schema),
+      request_bodies_schemas(request),
       "\n",
       "RESPONSE:\n",
       inspect(response.body.schema)
     ]
+  end
+
+  defp request_bodies_schemas(request) do
+    schemas =
+      request.bodies
+      |> Enum.map(fn body -> inspect(body.schema) end)
+      |> Enum.join(", ")
+
+    "[#{schemas}]"
   end
 
   defp cli_description do
