@@ -1,5 +1,9 @@
 ### Changelog
 
+##### 0.13.0
+
+* Support tomograph 3.0 json schema format
+
 ##### 0.12.0
 
 * `mix plumbapius.cover -v` option implemented
