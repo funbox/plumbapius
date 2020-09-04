@@ -5,8 +5,7 @@ defmodule Plumbapius.AbstractPlugTest do
   alias FakePlugImplementation, as: Helper
   alias Plumbapius.Plug.Options.IncorrectSchemaError
   alias Plumbapius.AbstractPlug
-  alias Plumbapius.Request
-  alias Plumbapius.Response
+  alias Plumbapius.Coverage.CoverageTracker.CoveredCase
 
   describe "test call method" do
     test "returns conn even for incorrect request when Plumbapius.ignore() is used" do
@@ -80,7 +79,7 @@ defmodule Plumbapius.AbstractPlugTest do
 
     test "raises error when response returns incorrect json" do
       conn =
-        post_request(123, "qwe")
+        post_request(123, "{}")
         |> put_resp_header("content-type", "application/json")
 
       assert_raise Helper.ResponseHandlerRaiseError, fn -> send_resp(conn) end
@@ -135,7 +134,7 @@ defmodule Plumbapius.AbstractPlugTest do
 
       send_resp(conn)
 
-      assert_received({:response_covered_called, %Request.Schema{}, %Response.Schema{}})
+      assert_received({:response_covered_called, %CoveredCase{}})
     end
 
     test "allows handle_request_error callback to modify conn" do

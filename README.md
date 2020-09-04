@@ -158,6 +158,12 @@ To see request/response schemas use `-v` option
 > mix plumbapius.cover -s doc.json -v
 ```
 
+For coverage that includes oneOfs and structs use `-m` option
+
+```
+> mix plumbapius.cover -s doc.json -m
+```
+
 You can configure plumbapius to ignore coverage for some requests:
 
 ```

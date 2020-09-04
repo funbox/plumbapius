@@ -1,8 +1,12 @@
 ### Changelog
 
-##### 0.13.0
+##### 0.14.0
 
 * Support tomograph 3.0 json schema format
+
+##### 0.13.0
+
+* `mix plumbapius.cover -m` option implemented. It enables oneOfs and enums coverage tracking.
 
 ##### 0.12.0
 
