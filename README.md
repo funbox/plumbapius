@@ -108,16 +108,16 @@ end
 
 A simple mix task is provided to check uncovered requests.
 
-First configure `preferred_cli_env` for plumbapius task
+First configure `preferred_cli_env` for Plumbapius task:
 
-```
- def project do
-    [
-      preferred_cli_env: [
-        "plumbapius.cover": :test,
-      ]
+```elixir
+def project do
+  [
+    preferred_cli_env: [
+      "plumbapius.cover": :test,
     ]
-  end
+  ]
+end
 ```
 
 ```
@@ -134,7 +134,7 @@ Missed cases:
 Coverage: 50.0%
 ```
 
-Task fails with error code if coverage is below given min value
+Task fails with error code if coverage is below given min value:
 
 ```
 > mix plumbapius.cover -s doc.json --min-coverage=0.6
@@ -152,21 +152,21 @@ Coverage: 50.0%
 ERROR! min coverage of 50.0% is required
 ```
 
-To see request/response schemas use `-v` option
+To see request/response schemas use `-v` option:
 
 ```
 > mix plumbapius.cover -s doc.json -v
 ```
 
-For coverage that includes oneOfs and structs use `-m` option
+For coverage that includes oneOfs and structs use `-m` option:
 
 ```
 > mix plumbapius.cover -s doc.json -m
 ```
 
-You can configure plumbapius to ignore coverage for some requests:
+You can configure Plumbapius to ignore coverage for some requests:
 
-```
+```elixir
 config :plumbapius, ignore_coverage: [
   # {method :: String.t() | atom, path :: String.t() | Regex.t(), status :: pos_integer() | :all}
   {"GET", "/bot/v1/{chatbot}/messages", 400},
