@@ -1,5 +1,9 @@
 # Plumbapius
 
+<img align="right" width="160" height="160"
+     alt="Plumbapius avatar: a pipe with sparkles around"
+     src="./logo.png">
+
 [![Build Status](https://travis-ci.org/funbox/plumbapius.svg?branch=master)](https://travis-ci.org/funbox/plumbapius)
 [![Coverage Status](https://coveralls.io/repos/github/funbox/plumbapius/badge.svg?branch=master)](https://coveralls.io/github/funbox/plumbapius?branch=master)
 
@@ -173,5 +177,9 @@ config :plumbapius, ignore_coverage: [
   {:all, "/admin/users/", :all},
 ]
 ```
+
+## Credits
+
+Cute picture for the project was made by [Igor Garybaldi](http://pandabanda.com/).
 
 [![Sponsored by FunBox](https://funbox.ru/badges/sponsored_by_funbox_centered.svg)](https://funbox.ru)
