@@ -7,7 +7,7 @@
 [![Build Status](https://travis-ci.org/funbox/plumbapius.svg?branch=master)](https://travis-ci.org/funbox/plumbapius)
 [![Coverage Status](https://coveralls.io/repos/github/funbox/plumbapius/badge.svg?branch=master)](https://coveralls.io/github/funbox/plumbapius?branch=master)
 
-Tool for validation HTTP requests & responses according to API Blueprint specs.
+Tool for validation of HTTP requests & responses according to API Blueprint specs.
 
 It can be used both in test and production environments.
 
@@ -26,7 +26,7 @@ end
 Plumbapius requires conversion of APIB to JSON schema.
 
 Some mix tasks to make this process easier are included and described below.
-These tasks are supposed to be run manually and resulting JSON schema to be committed.
+These tasks are supposed to be run manually and resulting JSON schema has to be committed.
 
 ### `plumbapius.get_docs`
 
