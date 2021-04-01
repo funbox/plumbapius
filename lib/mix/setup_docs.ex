@@ -45,11 +45,9 @@ defmodule Mix.Tasks.Plumbapius.SetupDocs do
   end
 
   defp run_drafter(apib_filepath) do
-    try do
-      System.cmd("drafter", [apib_filepath], into: File.stream!(@temp_yml_filepath))
-    catch
-      :error, :enoent -> raise "no drafter executable is available in PATH"
-    end
+    System.cmd("drafter", [apib_filepath], into: File.stream!(@temp_yml_filepath))
+  catch
+    :error, :enoent -> raise "no drafter executable is available in PATH"
   end
 
   defp run_crafter(apib_filepath) do
