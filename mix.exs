@@ -5,7 +5,7 @@ defmodule Plumbapius.MixProject do
     [
       app: :plumbapius,
       version: "0.14.0",
-      elixir: "~> 1.10.0",
+      elixir: "~> 1.10",
       deps: deps(),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
@@ -69,12 +69,12 @@ defmodule Plumbapius.MixProject do
       {:jason, "~> 1.2"},
       {:ex_json_schema, "~> 0.7.3"},
       {:plug, "~> 1.0"},
+      {:optimus, "~> 0.1.9"},
+      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
       {:dialyxir, "~> 1.0", only: [:dev, :test], runtime: false},
       {:credo, "~> 1.2", only: [:dev, :test], runtime: false},
       {:excoveralls, "~> 0.11", only: :test},
-      {:excoveralls_linter, "~> 0.0.2", only: :test},
-      {:optimus, "~> 0.1.9"},
-      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false}
+      {:excoveralls_linter, "~> 0.0.2", only: :test}
     ]
   end
 
