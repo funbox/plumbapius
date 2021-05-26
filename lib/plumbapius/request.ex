@@ -45,30 +45,30 @@ defmodule Plumbapius.Request do
     end
   end
 
-  defmodule NotFoundSchemaForReqestBodyError do
-    defexception []
-
-    @impl true
-    def message(_exception) do
-      "not found schema for reqest body"
-    end
-  end
-
   alias Plumbapius.Request
 
-  @spec validate_body(Request.Schema.t(), map()) :: :ok | {:error, list()}
+  @spec validate_body(Request.Schema.t(), map()) ::
+          :ok | {:error, %{ExJsonSchema.Schema.Root.t() => ExJsonSchema.Validator.errors()}}
   def validate_body(request_schema, request_body) do
     validate_request_body(request_schema.bodies, request_body)
   end
 
-  defp validate_request_body([], _request_body) do
-    {:error, %NotFoundSchemaForReqestBodyError{}}
+  defp validate_request_body(bodies, request_body) do
+    do_validate_request_body(bodies, request_body, %{})
   end
 
-  defp validate_request_body([body_schema | body_schemes], request_body) do
-    case ExJsonSchema.Validator.validate(body_schema, request_body) do
-      :ok -> :ok
-      {:error, _} -> validate_request_body(body_schemes, request_body)
+  defp do_validate_request_body([], _request_body, errors) do
+    {:error, errors}
+  end
+
+  defp do_validate_request_body([body_schema | body_schemes], request_body, errors) do
+    case ExJsonSchema.Validator.validate(body_schema, request_body, error_formatter: false) do
+      :ok ->
+        :ok
+
+      {:error, validation_errors} ->
+        errors = Map.put(errors, body_schema, validation_errors)
+        do_validate_request_body(body_schemes, request_body, errors)
     end
   end
 
