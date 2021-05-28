@@ -1,5 +1,9 @@
 ### Changelog
 
+##### 0.15.0
+
+* More detailed error reporting implemented for request body validation
+
 ##### 0.14.0
 
 * Support tomograph 3.0 json schema format
