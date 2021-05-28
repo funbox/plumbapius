@@ -2,19 +2,26 @@ defmodule Plumbapius.RequestTest do
   use ExUnit.Case, async: true
   doctest Plumbapius.Request
   alias Plumbapius.Request
-  alias Plumbapius.Request.NotFoundSchemaForReqestBodyError
+  alias ExJsonSchema.Validator.Error
 
   describe "#validate_body" do
     test "when the body according to the schema with 1 body option" do
-      request_body = %{"msisdn" => 123}
+      request_body = %{"msisdn" => 123, "last_name" => "Ivanov"}
 
       assert Request.validate_body(request_schema(), request_body) == :ok
     end
 
     test "when the body does not match the schema with 1 body option" do
       request_body = %{"msisdn" => "123"}
+      request_schema = request_schema()
+      [schema] = request_schema.bodies
 
-      assert Request.validate_body(request_schema(), request_body) == {:error, %NotFoundSchemaForReqestBodyError{}}
+      assert {:error, %{^schema => errors}} = Request.validate_body(request_schema, request_body)
+
+      assert Enum.sort(errors) == [
+               %Error{error: %Error.Required{missing: ["last_name"]}, path: "#"},
+               %Error{error: %Error.Type{actual: "string", expected: ["number"]}, path: "#/msisdn"}
+             ]
     end
 
     test "when the body according one of 2 body options of the schema" do
@@ -27,8 +34,31 @@ defmodule Plumbapius.RequestTest do
     test "when the body does not match any of 2 body options of the schema" do
       schema = request_schema_with_two_requests()
 
-      assert Request.validate_body(schema, %{"msisdn" => "123"}) == {:error, %NotFoundSchemaForReqestBodyError{}}
-      assert Request.validate_body(schema, %{"phoneNumber" => "123"}) == {:error, %NotFoundSchemaForReqestBodyError{}}
+      msisdn_schema =
+        Enum.find(schema.bodies, fn %{schema: schema} -> schema["properties"]["msisdn"] == %{"type" => "number"} end)
+
+      phone_number_schema =
+        Enum.find(schema.bodies, fn %{schema: schema} ->
+          schema["properties"]["phoneNumber"] == %{"type" => "number"}
+        end)
+
+      assert Request.validate_body(schema, %{"msisdn" => "123"}) ==
+               {:error,
+                %{
+                  msisdn_schema => [
+                    %Error{error: %Error.Type{actual: "string", expected: ["number"]}, path: "#/msisdn"}
+                  ],
+                  phone_number_schema => [%Error{error: %Error.Required{missing: ["phoneNumber"]}, path: "#"}]
+                }}
+
+      assert Request.validate_body(schema, %{"phoneNumber" => "123"}) ==
+               {:error,
+                %{
+                  msisdn_schema => [%Error{error: %Error.Required{missing: ["msisdn"]}, path: "#"}],
+                  phone_number_schema => [
+                    %Error{error: %Error.Type{actual: "string", expected: ["number"]}, path: "#/phoneNumber"}
+                  ]
+                }}
     end
   end
 
@@ -55,7 +85,7 @@ defmodule Plumbapius.RequestTest do
         "$schema" => "http://json-schema.org/draft-04/schema#",
         "type" => "object",
         "properties" => %{"msisdn" => %{"type" => "number"}},
-        "required" => ["msisdn"]
+        "required" => ["msisdn", "last_name"]
       },
       "responses" => []
     })
