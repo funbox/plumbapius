@@ -1,5 +1,9 @@
 ### Changelog
 
+##### 0.16.0
+
+* More detailed error reporting implemented when error occurs during request handling
+
 ##### 0.15.0
 
 * More detailed error reporting implemented for request body validation
