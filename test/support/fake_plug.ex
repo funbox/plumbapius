@@ -36,6 +36,6 @@ defmodule FakePlug do
       status: 200,
       content_type: "application/json",
       body: ["{", "foo", ":", "bar", "}"],
-      error: "invalid"
+      validation_error: "invalid"
     }
 end

@@ -77,6 +77,17 @@ defmodule Plumbapius.AbstractPlugTest do
                    fn -> send_resp(conn) end
     end
 
+    test "raises error when response has exception" do
+      conn =
+        post_request(500, ~s({"confirmation": {"id": "avaFqscDQWcAs"}}))
+        |> assign(:reason, %RuntimeError{})
+        |> assign(:stack, [])
+
+      assert_raise Helper.ResponseHandlerRaiseError,
+                   ~r/RuntimeError/,
+                   fn -> send_resp(conn) end
+    end
+
     test "raises error when response returns incorrect json" do
       conn =
         post_request(123, "{}")
