@@ -74,7 +74,7 @@ defmodule Plumbapius.MixProject do
       {:dialyxir, "~> 1.0", only: [:dev, :test], runtime: false},
       {:credo, "~> 1.5.6", only: [:dev, :test], runtime: false},
       {:excoveralls, "~> 0.11", only: :test},
-      {:excoveralls_linter, "~> 0.0.2", only: :test}
+      {:excoveralls_linter, "~> 0.2.1", only: :test}
     ]
   end
 
@@ -82,7 +82,9 @@ defmodule Plumbapius.MixProject do
     [
       test: ["test --no-start"],
       cover: ["coveralls --sort cov:desc --umbrella"],
-      "cover.lint": ["coveralls.lint --missed-lines-threshold=2 --required-file-coverage=0.9"],
+      "cover.lint": [
+        "coveralls.lint --required-project-coverage=0.99 --missed-lines-threshold=2 --required-file-coverage=0.9"
+      ],
       "cover.html": ["coveralls.html --umbrella"],
       "cover.detail": ["coveralls.detail --umbrella --filter"],
       arch_test: ["run --no-start test/arch_test.exs"]

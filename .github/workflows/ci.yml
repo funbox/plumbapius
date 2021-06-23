@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    name: Test
+    runs-on: ubuntu-latest
+    env:
+      MIX_ENV: test
+    strategy:
+      matrix:
+        include:
+          - elixir: 1.11.0
+            otp_release: 23.0
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Elixir
+      uses: erlef/setup-elixir@v1
+      with:
+        elixir-version: ${{ matrix.elixir }} 
+        otp-version: ${{ matrix.otp_release }}
+    - name: Cache deps
+      uses: actions/cache@v2
+      with:
+        path: deps
+        key: ${{ matrix.elixir }}-${{ matrix.otp_release }}-${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
+    - name: Cache PLT
+      id: cache-plt
+      uses: actions/cache@v2
+      with:
+        path: |
+          _build/test/*.plt
+          _build/test/*.plt.hash
+        key: plt-cache-${{ matrix.elixir }}-${{ matrix.otp_release }}-${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
+        # Key patterns to fall back to if we don't find an exact match for `key`
+        restore-keys: |
+          plt-cache-
+    - name: Install dependencies
+      run: mix deps.get
+    - name: Check formatted
+      run: mix format --check-formatted --dry-run
+    - name: Compile
+      run: mix compile --warnings-as-errors
+    - name: Run tests
+      run: mix test
+    - name: Run dialyzer
+      run: mix dialyzer
+    - name: Run credo
+      run: mix credo
+    - name: Run coverage
+      run: mix cover.lint

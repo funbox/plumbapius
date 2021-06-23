@@ -4,9 +4,6 @@
      alt="Plumbapius avatar: a pipe with sparkles around"
      src="./logo.png">
 
-[![Build Status](https://travis-ci.org/funbox/plumbapius.svg?branch=master)](https://travis-ci.org/funbox/plumbapius)
-[![Coverage Status](https://coveralls.io/repos/github/funbox/plumbapius/badge.svg?branch=master)](https://coveralls.io/github/funbox/plumbapius?branch=master)
-
 Tool for validation of HTTP requests & responses according to API Blueprint specs.
 
 It can be used both in test and production environments.
