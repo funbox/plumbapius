@@ -112,6 +112,7 @@ defmodule FakePlugImplementation do
     ]
   }
 
+  @spec options() :: Plumbapius.Plug.Options.t()
   def options, do: @options
 
   @spec handle_request_error(map, term) :: none

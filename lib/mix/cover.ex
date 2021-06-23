@@ -183,7 +183,7 @@ defmodule Mix.Tasks.Plumbapius.Cover do
     )
   end
 
-  def ignore_patterns do
+  defp ignore_patterns do
     Application.get_env(:plumbapius, :ignore_coverage, [])
   end
 end
