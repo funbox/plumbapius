@@ -5,6 +5,7 @@ defmodule Plumbapius.Plug.SendToSentryValidationError do
   alias Plumbapius.Response
   alias Plumbapius.AbstractPlug
 
+  @impl Plug
   defdelegate init(options), to: AbstractPlug
 
   @impl Plug
